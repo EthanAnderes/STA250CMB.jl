@@ -2,7 +2,7 @@
 
 Cosmic timeline
 ============================================
-![jpg](CMB_Timeline300_no_WMAP.jpg)
+![jpg](figures/CMB_Timeline300_no_WMAP.jpg)
 
 
 
@@ -14,13 +14,13 @@ Cosmic timeline
 Holmdel Horn Antenna (60s)
 ==============================================
 
-* Accidental discovery of CMB in 1964 by American radio astronomers Penzias and Wilson (a funny account in [link](https://www.youtube.com/watch?v=kvlCFyufaJ8)). 
+* Accidental discovery of CMB in 1964 by American radio astronomers Penzias and Wilson (a funny account in [link](https://www.youtube.com/watch?v=kvlCFyufaJ8)).
 
-* Earned the 1978 Nobel Prize. 
+* Earned the 1978 Nobel Prize.
 
 * Here is the Holmdel Horn Antenna on which Penzias and Wilson discovered the cosmic microwave background.
 
-![png](Holmdel_Horn_Antenna.png)
+![png](figures/Holmdel_Horn_Antenna.png)
 
 * The CMB has an (spatial) average thermal black body spectrum at a temperature of about 2.72548 K. There are tiny spatial fluctuations at about ±0.0005 K (converted to μK that is fluctuations at about ±10^6 * 0.0005 μK  = 500 μK). The map of these fluctuations are what we refer to as the CMB.
 
@@ -33,7 +33,7 @@ COBE (90s)
 
 * 1990 – FIRAS on the Cosmic Background Explorer (COBE) satellite measures the black body form of the CMB spectrum with exquisite precision, and shows that the microwave background has a nearly perfect black-body spectrum and thereby strongly constrains the density of the intergalactic medium.
 
-![png](COBE_blackbody.png)
+![png](figures/COBE_blackbody.png)
 
 
 * In 2006 – Two of COBE's principal investigators, George Smoot and John Mather, received the Nobel Prize in Physics in 2006 for their work on precision measurement of the CMBR.
@@ -46,7 +46,7 @@ WMAP (2003, 2006, 2011)
 * 2003, 2006 – The WMAP spacecraft produces a map of the whole sky are released, confirming previous analysis, correcting several points, and including polarization data.
 
 
-![png](WMAPmap.png)
+![png](figures/WMAPmap.png)
 
 SPT and Planck (current)
 =====================================================
@@ -54,20 +54,20 @@ SPT and Planck (current)
 
 * Planck temperature map (satellite, covering the whole sky)
 
-![jpg](Planck_CMB.jpg)
+![jpg](figures/Planck_CMB.jpg)
 
 * 9 frequencies of Planck maps
 
-![jpg](9-freqs-2015_black.jpg)
+![jpg](figures/9-freqs-2015_black.jpg)
 
 
 * SPT temperature map (South Pole telescope, high resolution but only on parts of the sky)
 
-![png](SPT.png)
+![png](figures/SPT.png)
 
 
 * Resolution comparison between COBE, WMAP and Planck
-![jpg](COBE_WMAP_Planck.jpg)
+![jpg](figures/COBE_WMAP_Planck.jpg)
 
 
 
@@ -75,21 +75,16 @@ Spectral Densities
 ==================================================
 
 * WMAP spectral density estimate.
-![png](WMAPcTT.png)
+![png](figures/WMAPcTT.png)
 
 * Planck spectral density estimate.
-![png](Planck_sptra_linearx.png)
+![png](figures/Planck_sptra_linearx.png)
 
 
 * Another Planck spectral density estimate.
-![png](Figures_planck2014_TT_Dl_NORES_bin30_w88mm.png)
+![png](figures/Figures_planck2014_TT_Dl_NORES_bin30_w88mm.png)
 
 
 * SPT + WMAP spectral density estimates.
 
-![png](SPT+WMAP_spectra.png)
-
-
-
-
-
+![png](figures/SPT+WMAP_spectra.png)
