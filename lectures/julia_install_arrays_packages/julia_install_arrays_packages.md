@@ -1,5 +1,5 @@
 
-[](weave("lectures/julia_install_arrays_packages/julia_install_arrays_packages.mdw", plotlib="PyPlot", doctype="github")
+[](weave("lectures/julia_install_arrays_packages/julia_install_arrays_packages.mdw", plotlib="PyPlot", doctype="github"))
 
 
 #  Why I'm excited about Julia
@@ -101,7 +101,6 @@ julia> d = sin(a * b * π)
 ````
 
 
-![](figures/julia_install_arrays_packages_1_1.png)
 
 
 
@@ -159,9 +158,9 @@ julia> mat1 = [1.1 2.0 3; 4 5 6] # a matrix.
 
 julia> mat2 = randn(3,4)  # a matrix with N(0,1) entries.
 3x4 Array{Float64,2}:
-  0.207744  -0.505923   -1.01331    1.18486
- -0.496404  -0.0290163   0.303663  -1.02236
- -1.54354   -0.547974   -1.66146   -1.87705
+ -0.626719  -0.786839   -0.7275    1.73395 
+  0.266242  -0.21617    -0.285678  0.340494
+  2.8814    -0.0782368  -1.86271   0.107728
 
 julia> mat3 = zeros(2,2,2)  # a 2x2x2 multidimentional array
 2x2x2 Array{Float64,3}:
@@ -196,34 +195,34 @@ julia> row   = [1  2  4  6]  # rows are two dimensional
  1  2  4  6
 
 julia> mat2[1, 2] # first row, second column
--0.5059229769554402
+-0.7868385630749404
 
 julia> mat2[1, :] # first row
 1x4 Array{Float64,2}:
- 0.207744  -0.505923  -1.01331  1.18486
+ -0.626719  -0.786839  -0.7275  1.73395
 
 julia> mat2[:, 2] # second column...trailing degenerate dimensions are removed
 3-element Array{Float64,1}:
- -0.505923 
- -0.0290163
- -0.547974 
+ -0.786839 
+ -0.21617  
+ -0.0782368
 
 julia> mat2[1:3, 7:end] # matrix sub block
 3x0 Array{Float64,2}
 
 julia> mat2[:]  # stacks the columns
 12-element Array{Float64,1}:
-  0.207744 
- -0.496404 
- -1.54354  
- -0.505923 
- -0.0290163
-  ⋮        
-  0.303663 
- -1.66146  
-  1.18486  
- -1.02236  
- -1.87705  
+ -0.626719
+  0.266242
+  2.8814  
+ -0.786839
+ -0.21617 
+  ⋮       
+ -0.285678
+ -1.86271 
+  1.73395 
+  0.340494
+  0.107728
 
 ````
 
@@ -236,8 +235,8 @@ Arrays are mutable so you can allocate them and fill in their entries
 ````julia
 julia> mat5 = Array(Float64, 2,3)  # allocate a 2x3 array with Float64 entries
 2x3 Array{Float64,2}:
- 4.24399e-314  0.0  2.19807e-314
- 1.061e-314    0.0  2.23895e-314
+ 4.24399e-314  0.0  2.26914e-314
+ 1.061e-314    0.0  2.26914e-314
 
 julia> mat5[1,2] = 0  # change the 1,2 entry to 0.0
 0
@@ -248,7 +247,7 @@ julia> mat5[5] = 1000 # change the 5th entry (in column major ordering)
 julia> mat5
 2x3 Array{Float64,2}:
  4.24399e-314  0.0  1000.0         
- 1.061e-314    0.0     2.23895e-314
+ 1.061e-314    0.0     2.26914e-314
 
 julia> mat5[:,1] = 22 # change everything in first column to 22 and supress output
 22
@@ -256,12 +255,12 @@ julia> mat5[:,1] = 22 # change everything in first column to 22 and supress outp
 julia> mat5
 2x3 Array{Float64,2}:
  22.0  0.0  1000.0         
- 22.0  0.0     2.23895e-314
+ 22.0  0.0     2.26914e-314
 
 julia> mat5[:]   = rand(2,3)  # replace all entries of mat5 with U(0,1) entries
 2x3 Array{Float64,2}:
- 0.254848  0.366316  0.771549
- 0.590788  0.132704  0.196627
+ 0.348128   0.488032   0.963199
+ 0.0657757  0.0928857  0.938046
 
 ````
 
@@ -280,33 +279,33 @@ julia> mat1 = eye(2)
 
 julia> mat2 = randn(2,2)
 2x2 Array{Float64,2}:
- -1.38098  0.900008
-  1.16352  1.2803  
+ -1.62956   -0.0244404
+ -0.346205   0.927838 
 
 julia> mat2 .^ 2 # .^ is coordinstewise power
 2x2 Array{Float64,2}:
- 1.90712  0.810014
- 1.35377  1.63916 
+ 2.65547   0.000597332
+ 0.119858  0.860884   
 
 julia> exp(mat2)
 2x2 Array{Float64,2}:
- 0.251331  2.45962
- 3.20117   3.59771
+ 0.196016  0.975856
+ 0.707367  2.52904 
 
 julia> mat1 .* mat2
 2x2 Array{Float64,2}:
- -1.38098  0.0   
-  0.0      1.2803
+ -1.62956  -0.0     
+ -0.0       0.927838
 
 julia> mat2 .<= 0
 2x2 BitArray{2}:
-  true  false
- false  false
+ true   true
+ true  false
 
 julia> mat1 .<= mat2
 2x2 BitArray{2}:
- false  true
-  true  true
+ false  false
+ false  false
 
 ````
 
@@ -321,14 +320,11 @@ julia> mat2[mat2 .<= mat1] = -1
 
 julia> mat2
 2x2 Array{Float64,2}:
- -1.0      0.900008
-  1.16352  1.2803  
+ -1.0  -1.0
+ -1.0  -1.0
 
 julia> find(mat2 .≥ 0) # returns a vector of linear column-wise indices
-3-element Array{Int64,1}:
- 2
- 3
- 4
+0-element Array{Int64,1}
 
 ````
 
@@ -341,34 +337,34 @@ Built in linear algebra (from BLAS and LPACK)
 ````julia
 julia> mat2 = rand(3,3)
 3x3 Array{Float64,2}:
- 0.26007   0.162725  0.142675
- 0.774435  0.146265  0.383884
- 0.724349  0.109381  0.375491
+ 0.492941   0.769767   0.341974
+ 0.485163   0.0334111  0.794404
+ 0.0114348  0.882005   0.415657
 
 julia> mat2 = mat2 * mat2.' # matrix multiplication
 3x3 Array{Float64,2}:
- 0.114472  0.279979  0.259754
- 0.279979  0.768511  0.721106
- 0.259754  0.721106  0.67764 
+ 0.952478  0.536541  0.826718
+ 0.536541  0.867578  0.365216
+ 0.826718  0.365216  0.950834
 
 julia> d, v = eig(mat2)
-([0.00014932990712749123,0.013074035627661297,1.5473992461600308],
+([0.09730593408554283,0.5654481590928806,2.1081351758810247],
 3x3 Array{Float64,2}:
-  0.167992   0.951554   -0.257535
- -0.706458  -0.0659954  -0.704671
-  0.687529  -0.300316   -0.661146)
+ -0.746133   0.153183  -0.647935
+  0.222135  -0.860137  -0.459152
+  0.627648   0.486517  -0.60775 )
 
 julia> u  = chol(mat2)
 3x3 UpperTriangular{Float64,Array{Float64,2}}:
- 0.338337  0.827515  0.767736 
- 0.0       0.289361  0.296489 
- 0.0       0.0       0.0177538
+ 0.97595  0.549763   0.847091
+ 0.0      0.75189   -0.133641
+ 0.0      0.0        0.464124
 
 julia> l  = chol(mat2, Val{:L})
 3x3 LowerTriangular{Float64,Array{Float64,2}}:
- 0.338337  0.0       0.0      
- 0.827515  0.289361  0.0      
- 0.767736  0.296489  0.0177538
+ 0.97595    0.0       0.0     
+ 0.549763   0.75189   0.0     
+ 0.847091  -0.133641  0.464124
 
 ````
 
@@ -418,13 +414,13 @@ julia> x = sin(1 ./ linspace(.05, 0.5, 1_000))
 
 julia> plot(x, "r--")
 1-element Array{Any,1}:
- PyObject <matplotlib.lines.Line2D object at 0x32a50ce90>
+ PyObject <matplotlib.lines.Line2D object at 0x328331290>
 
 julia> title("My Plot")
-PyObject <matplotlib.text.Text object at 0x3298c8b10>
+PyObject <matplotlib.text.Text object at 0x3282fc910>
 
 julia> ylabel("red curve")
-PyObject <matplotlib.text.Text object at 0x3260cd750>
+PyObject <matplotlib.text.Text object at 0x328283d10>
 
 ````
 
@@ -438,7 +434,7 @@ PyObject <matplotlib.text.Text object at 0x3260cd750>
 
 ````julia
 julia> imshow(rand(100,100))
-PyObject <matplotlib.image.AxesImage object at 0x32b067210>
+PyObject <matplotlib.image.AxesImage object at 0x328421c50>
 
 ````
 
@@ -461,19 +457,19 @@ julia> x = 1:10
 
 julia> y = sin(x) + rand(10)/5
 10-element Array{Float64,1}:
-  0.879096
-  0.924553
-  0.295846
- -0.603455
- -0.898748
- -0.169629
-  0.756104
-  1.18645 
-  0.582592
- -0.42786 
+  1.03927 
+  1.01837 
+  0.245224
+ -0.648291
+ -0.762578
+ -0.236386
+  0.832584
+  1.05947 
+  0.532981
+ -0.412461
 
 julia> iy = scii.UnivariateSpline(x, y, s = 0) # python object
-PyObject <scipy.interpolate.fitpack2.InterpolatedUnivariateSpline object at 0x32b0a6290>
+PyObject <scipy.interpolate.fitpack2.InterpolatedUnivariateSpline object at 0x32845fc10>
 
 ````
 
@@ -507,7 +503,7 @@ julia> [println(k) for k in keys(iy)];
 We want the field that gives us the spline function
 ````julia
 julia> iy[:__call__]
-PyObject <bound method InterpolatedUnivariateSpline.__call__ of <scipy.interpolate.fitpack2.InterpolatedUnivariateSpline object at 0x32b0a6290>>
+PyObject <bound method InterpolatedUnivariateSpline.__call__ of <scipy.interpolate.fitpack2.InterpolatedUnivariateSpline object at 0x32845fc10>>
 
 ````
 
@@ -526,11 +522,11 @@ linspace(2.0,9.0,1000)
 
 julia> plot(xnew, yinterp(xnew))
 1-element Array{Any,1}:
- PyObject <matplotlib.lines.Line2D object at 0x32b110a90>
+ PyObject <matplotlib.lines.Line2D object at 0x332d08f50>
 
 julia> plot(x, y,"r*")
 1-element Array{Any,1}:
- PyObject <matplotlib.lines.Line2D object at 0x32b110c90>
+ PyObject <matplotlib.lines.Line2D object at 0x332d14190>
 
 ````
 
