@@ -1,0 +1,2078 @@
+[](weave("lectures/julia_intro/julia_intro.mdw", plotlib="PyPlot", doctype="github")
+
+
+#  Why I'm excited about Julia
+
+* Open source
+* High level matlab-like syntax
+* Fast like C (often one can get within a factor of 2 of C)
+* Made for scientific computing (matrices first class, linear algebra support, native fft ...)
+* Modern features like:
+  - Macros,
+  - closures,
+  - pass by reference,
+  - OO qualities,
+  - modules
+  - code can be written in Unicode ( I'll never write sqrt(2) again. instead √(2) )
+  - parallelism and distributed computation
+  - powerful shell programming
+  - named and optional arguments
+  - julia notebooks
+* I can finally write fast loops (not to be underestaimted)
+* Since it is fast most of julia is written in julia
+* Since it is high level, the source is actually readable (and a good way to learn)
+* Julia interacts with python so well, any of the missing functionality can be called out to python
+
+
+
+Installation
+=============================================
+
+There are three ways to install Julia: compile from source, download the binaries, use [homebrew](http://brew.sh).
+
+
+### Compile from source
+I compile Julia from source and usually put it in a directory called `Software`. You will first need to make sure you have the command line arguments installed (if your on a mac). First download X-code from the mac store and then enter `xcode-select --install` at the terminal. Now you need up-to-date gcc (and other stuff). I use homebrew for this.
+```
+brew install gcc
+brew install Caskroom/cask/xquartz
+brew install cmake
+```
+Once these are installed I do the following
+```
+cd Software
+git clone -b release-0.4 git://github.com/JuliaLang/julia.git julia4
+cd julia4
+make
+```
+If this works, add `export PATH="/Users/ethananderes/Software/julia4/:$PATH"` (with `/Users/ethananderes` replaced by the path on your machine) to your `.bash_profile` and you should be able to call `julia` from the terminal.
+
+
+### Download binaries
+Probably the easiest way to install the Julia binaries is with homebrew (follow instructions [here](https://github.com/staticfloat/homebrew-julia/)).
+
+If you don't want to use homebrew, you can download the binaries directly from [julialang.com](julialang.com) but you will need to add the path to Julia in your `.bash_profile` if you do it that way.
+
+
+### Getting help
+
+The documentation found at [julialang.com](julialang.com) is pretty good. You can also ask questions on Google groups (search julia). The Julia community is pretty friendly and they welcome beginners so don't hesitate to ask for help.
+
+
+
+
+
+
+Python
+=============================================
+Most of the code you will write in this class will be in Julia. However, Physicists traditionally use python for all their data analysis so we will need to call some of the python modules written specifically for CMB analysis. Lucky python and Julia work amazing well together so this will not be a problem. If you already have python working (and have numpy, matplotlib, etc installed and working) then your already ready to go. If not, then I recommend installing anaconda which will automatically install everything we need.
+
+To install Anaconda I recommend using the command-line installer (instructions [here](https://www.continuum.io/downloads)).
+
+Once Anaconda is installed you can add packages using something like `conda install ...` for packages registered with conda. If you want to install a package not registered with conda you can do something like the following example (to install Pweave in python)
+```
+conda config --add channels mpastell
+conda install pweave
+```
+
+If, at any time, you need to update Anaconda just enter the following at the terminal.
+```
+conda update conda
+conda update anaconda
+```
+
+
+
+Julia basics
+=======================================
+
+Using Julia as a calculator.
+<<term=true>>=
+a = 1 + sin(2)
+b = besselj(2, a ^ 2)
+d = sin(a * b * π)
+@
+
+
+Shell mode, help mode and namesapce variables
+```
+shell>  pwd
+/Users/ethananderes/Dropbox/Courses
+
+shell>  cd ..
+/Users/ethananderes/Dropbox
+
+help?>  besselj
+search: besselj besseljx besselj1 besselj0 bessely besselk besseli besselh besselyx bessely1 bessely0 besselkx besselix besselhx
+
+
+julia> whos() # variables in my namespace
+```
+
+
+Run a file of Julia source
+```julia
+include("run.jl")  
+```
+
+Exit REPL and quit
+```
+quit()
+```
+
+To uninstall Julia, just remove binaries (this should just be one directory) and `~/.julia/`.
+
+
+
+
+
+
+Intro to multidimensional arrays
+=======================================
+In this class you will mostly work with multidimensional arrays. These are lightweight mutable containers.
+
+
+Here are a few ways to construct arrays
+<<term=true>>=
+vec1 = [1, 2, 3]  # a list (i.e. vector)
+mat1 = [1.1 2.0 3; 4 5 6] # a matrix.
+mat2 = randn(3,4)  # a matrix with N(0,1) entries.
+mat3 = zeros(2,2,2)  # a 2x2x2 multidimentional array
+mat4 = eye(5)  #<--- 5 x 5 idenity matrix
+@
+
+
+
+Accessing submatrices and elements of an array.
+<<term=true>>=
+row   = [1  2  4  6]  # rows are two dimensional
+mat2[1, 2] # first row, second column
+mat2[1, :] # first row
+mat2[:, 2] # second column...trailing degenerate dimensions are removed
+mat2[1:3, 7:end] # matrix sub block
+mat2[:]  # stacks the columns
+@
+
+
+Arrays are mutable so you can allocate them and fill in their entries
+<<term=true>>=
+mat5 = Array(Float64, 2,3)  # allocate a 2x3 array with Float64 entries
+mat5[1,2] = 0  # change the 1,2 entry to 0.0
+mat5[5] = 1000 # change the 5th entry (in column major ordering)
+mat5
+mat5[:,1] = 22 # change everything in first column to 22 and supress output
+mat5
+mat5[:]   = rand(2,3)  # replace all entries of mat5 with U(0,1) entries
+@
+
+
+
+Vectorize operations
+<<term=true>>=
+mat1 = eye(2)
+mat2 = randn(2,2)
+mat2 .^ 2 # .^ is coordinstewise power
+exp(mat2)
+mat1 .* mat2
+mat2 .<= 0
+mat1 .<= mat2
+@
+
+Finding and changing elements
+<<term=true>>=
+mat2[mat2 .<= mat1] = -1
+mat2
+find(mat2 .≥ 0) # returns a vector of linear column-wise indices
+@
+
+
+Built in linear algebra (from BLAS and LPACK)
+<<term=true>>=
+mat2 = rand(3,3)
+mat2 = mat2 * mat2 # matrix multiplication
+d, v = eig(mat2)
+u  = chol(mat2)
+l  = chol(mat2, Val{:L})
+@
+
+
+
+
+
+Julia packages
+=======================================
+
+
+Packages in Julia are hosted on github. These are saved in `~/.julia/`. Download a package with:
+```julia
+Pkg.add("Distributions")
+```
+This only needs to be done once. Loading a package into a session is done with `using`.
+```julia
+using Distributions
+rand(Beta(1/2, 1/2), 10) # from the Distributions package
+```
+Note that in the above code, the `rand` function is overloaded by `Distributions`.
+
+
+PyCall.....
+
+
+PyPlot...
+
+
+
+
+
+Functions, loops and conditionals in Julia
+========================================
+
+```julia
+# functions
+function foo(x, y)
+	w = x + y
+	z = sin(2 * w)
+    w ./ z, cos(w) # last line is what gets returned, multiple return values separated by comma, could use return
+end
+a, b = foo(5.0, 7.0) # functions called with parenthesis
+a, b = foo(ones(2,2), rand(2,2))
+```
+
+
+For loops
+```julia
+A = Array(Int64, (10,10)) # initialized 10x10 array of Int64's
+for i =  1:10
+	for j = 1:10
+		A[j, i] = i + j
+	end
+end
+A
+```
+
+
+```julia
+# conditionals
+x = 2
+if x == 5
+	print(1)
+else
+	print(2)
+end
+```
+
+
+
+#  I'll quickly go over a few fun extras
+
+
+```julia
+# quick function definition, 2a gets parsed as 2*a
+foo2(a, b) = 1 + 2a + 5b^4
+```
+
+
+
+
+    foo2 (generic function with 1 method)
+
+
+
+
+```julia
+# comprehensions for quick construction of Arrays
+[sin(x) for x = 1:3]
+```
+
+
+
+
+    3-element Array{Float64,1}:
+     0.841471
+     0.909297
+     0.14112
+
+
+
+
+```julia
+[abs(i - j) for i = [4, 7, 8], j = 1:3]
+```
+
+
+
+
+    3x3 Array{Int64,2}:
+     3  2  1
+     6  5  4
+     7  6  5
+
+
+
+
+```julia
+# easiy multiple assignment
+a, b, c = 1, 2, 3
+b
+```
+
+
+
+
+    2
+
+
+
+
+```julia
+# piping
+a = sin(cos(exp(5)))
+b = 5 |> exp |> cos |> sin
+a == b
+```
+
+
+
+
+    true
+
+
+
+
+```julia
+# un-named functions, i.e. lambda functions from python
+x -> sin(x^2) # convinent for piping
+```
+
+
+
+
+    (anonymous function)
+
+
+
+
+```julia
+y = 1.9 |> cos  |> z -> foo2(z,10) |> log
+```
+
+
+
+
+    10.819785352802628
+
+
+
+
+```julia
+# indexing can happen at the end
+a = (rand(10, 10) * rand(10, 10))[2, 2]
+```
+
+
+
+
+    3.16238320230161
+
+
+
+
+```julia
+# string interpolation is easy
+a = 5
+"The variable a is assigned the value $a."
+```
+
+
+
+
+    "The variable a is assigned the value 5."
+
+
+
+
+```julia
+a = "ethan"
+"The variable a is assigned the value $a."
+```
+
+
+
+
+    "The variable a is assigned the value ethan."
+
+
+
+
+```julia
+for a in ["baz", "boo", "bar"] # loop over a vector of strings
+	println("The variable a is assigned the value $a")
+end
+```
+
+    The variable a is assigned the value baz
+    The variable a is assigned the value boo
+    The variable a is assigned the value bar
+
+
+
+```julia
+# dictionaries
+a = Dict("bar" => 10, "baz" => 5, "boo" =>1)
+```
+
+
+
+
+    Dict{ASCIIString,Int64} with 3 entries:
+      "bar" => 10
+      "boo" => 1
+      "baz" => 5
+
+
+
+
+```julia
+a["baz"]
+```
+
+
+
+
+    5
+
+
+
+
+```julia
+# immutable tuples
+tul = (4, 5, 6)
+tul[2]
+```
+
+
+
+
+    5
+
+
+
+
+```julia
+tul[2] = 7
+```
+
+
+    `setindex!` has no method matching setindex!(::(Int64,Int64,Int64), ::Int64, ::Int64)
+    Closest candidates are:
+      setindex!(::Array{Any,N}, ::Any, ::Real)
+      setindex!(::Array{T,N}, ::Any, ::Real)
+      setindex!(::SubArray{T,N,P,IV,LD}, ::Any, ::Int64)
+      ...
+
+    while loading In[45], in expression starting on line 1
+
+
+
+
+
+```julia
+#sets
+As= Set(2,3,4,4,5,6)
+```
+
+
+
+
+    Set([4,2,3,5,6])
+
+
+
+
+```julia
+# julia is pass by reference so function can mutate it's arguments.
+# This is nice for memory management
+# the convention is that these mutating functions have a ! at the end of the name
+function foo!(x)
+	x[1] = 0
+	return nothing # optional
+end
+```
+
+
+
+
+    foo! (generic function with 1 method)
+
+
+
+
+```julia
+a = [1 0; 0 1]
+foo!(a)
+a
+```
+
+
+
+
+    2x2 Array{Int64,2}:
+     0  0
+     0  1
+
+
+
+
+```julia
+#optional arguments
+function fop(x, base = 10)
+	x = x^2
+	return base * x
+	x # this is ignored
+end
+```
+
+
+
+
+    fop (generic function with 2 methods)
+
+
+
+
+```julia
+fop(1)
+```
+
+
+
+
+    10
+
+
+
+
+```julia
+fop(1, 2)
+```
+
+
+
+
+    2
+
+
+
+
+```julia
+# named arguments with semicolon
+function tot(x, y; style=0, width=1, color=3)
+    x + y + style + width/color
+end
+```
+
+
+
+
+    tot (generic function with 1 method)
+
+
+
+
+```julia
+tot(1,2)
+```
+
+
+
+
+    3.3333333333333335
+
+
+
+
+```julia
+tot(1,2, width = 3)
+tot(1, 2; width = 3) # the semicolon in this case is un-necssary
+```
+
+
+
+
+    4.0
+
+
+
+
+```julia
+# splating
+args = [4, 5]
+fop(args...) # calls fob(args[1], args[2])
+```
+
+
+
+
+    80
+
+
+
+
+```julia
+# splating  a dic for named arguments
+dargs = Dict(:style => 5, :width => 3, :color => 1) # :style is of symbol type
+tot(4, 5; dargs...) # now the ; is required
+```
+
+
+
+
+    17.0
+
+
+
+
+```julia
+# variable length arguments
+bez(a, b, c...) = println("$c")
+bez(2,3, 4, 5, 6)
+```
+
+    (4,5,6)
+
+
+
+```julia
+# variable length argument combines nice with splatting
+bez2(c...) = bez(1, 2, c...) # the second c is a spat, the first makes a variable length arg
+bez2(4,5,6,7,8)
+```
+
+    (4,5,6,7,8)
+
+
+# Overall Design philosophy: type tree and multiple dispatch
+
+### Every variable has a concrete type
+
+
+```julia
+typeof(4)
+```
+
+
+
+
+    Int64
+
+
+
+
+```julia
+typeof(4.0)
+```
+
+
+
+
+    Float64
+
+
+
+
+```julia
+typeof(4//7)
+```
+
+
+
+
+    Rational{Int64}
+
+
+
+
+```julia
+typeof(rand(101,10)) # 2-d array of floats
+```
+
+
+
+
+    Array{Float64,2}
+
+
+
+
+```julia
+typeof([1, 2, 3]) # 1-d array of ints
+```
+
+
+
+
+    Array{Int64,1}
+
+
+
+
+```julia
+typeof(rand) # functions have a type
+```
+
+
+
+
+    Function
+
+
+
+
+```julia
+# types have types
+typeof(Float64) # convention, types start with capital letter
+```
+
+
+
+
+    DataType
+
+
+
+### Typing is not static
+
+
+```julia
+a = 4
+typeof(a)
+```
+
+
+
+
+    Int64
+
+
+
+
+```julia
+a = 1.0
+typeof(a)
+```
+
+
+
+
+    Float64
+
+
+
+### Besides concrete types, there are abstract types
+
+* Concrete types correspond to a definitive layout in memory (Int16, Int64, Array{Bool, 2})
+* Abstract types correspond to a collection or catigory of concrete types.
+* For example both Int64 and Float64 are a subtype of Real which is a subtype of Number, etc...
+* This gives a whole tree of types.
+* Leaf nodes of the tree are concrete types (these types have a specific way they are layed out in memory)
+* Parent nodes are abstract types (which don't have a fixed memory layout configuration)
+* For example Int16 and Int64 are both of abstract type Real but have different memory layouts
+
+
+
+```julia
+# You can move up tree with super
+super(Int64)
+```
+
+
+
+
+    Signed
+
+
+
+
+```julia
+super(Int64) |> super
+```
+
+
+
+
+    Integer
+
+
+
+
+```julia
+super(Int64) |> super |> super
+```
+
+
+
+
+    Real
+
+
+
+
+```julia
+super(Int64) |> super |> super |> super
+```
+
+
+
+
+    Number
+
+
+
+
+```julia
+super(Int64) |> super |> super |> super |> super # at the top of the tree we have Any
+```
+
+
+
+
+    Any
+
+
+
+
+```julia
+# You can move down the tree with subtypes
+subtypes(FloatingPoint)
+```
+
+
+
+
+    4-element Array{Any,1}:
+     Base.MPFR.BigFloat
+     Float16           
+     Float32           
+     Float64           
+
+
+
+
+```julia
+subtypes(AbstractArray)
+```
+
+
+
+
+    20-element Array{Any,1}:
+     AbstractSparseArray{Tv,Ti,N}                                                                  
+     Base.LinAlg.Bidiagonal{T}                                                                     
+     Base.LinAlg.Diagonal{T}                                                                       
+     Base.LinAlg.Hermitian{T,S<:AbstractArray{T,2}}                                                
+     Base.LinAlg.HessenbergQ{T,S<:AbstractArray{T,2}}                                              
+     Base.LinAlg.QRCompactWYQ{S,M<:AbstractArray{T,2}}                                             
+     Base.LinAlg.QRPackedQ{T,S<:AbstractArray{T,2}}                                                
+     Base.LinAlg.QRPackedWYQ{S,M<:AbstractArray{T,2}}                                              
+     Base.LinAlg.SymTridiagonal{T}                                                                 
+     Base.LinAlg.SymmetricRFP{T<:Union(Float32,Complex{Float64},Complex{Float32},Float64)}         
+     Base.LinAlg.Symmetric{T,S<:AbstractArray{T,2}}                                                
+     Base.LinAlg.TriangularRFP{T<:Union(Float32,Complex{Float64},Complex{Float32},Float64)}        
+     Base.LinAlg.Triangular{T,S<:AbstractArray{T,2},UpLo,IsUnit}                                   
+     Base.LinAlg.Tridiagonal{T}                                                                    
+     Base.LinAlg.Woodbury{T}                                                                       
+     DArray{T,N,A}                                                                                 
+     DenseArray{T,N}                                                                               
+     Range{T}                                                                                      
+     SubArray{T,N,P<:AbstractArray{T,N},I<:(Union(Range{Int64},Array{Int64,1},Colon,Int64)...,),LD}
+     ZMQ.Message                                                                                   
+
+
+
+
+```julia
+# check if a type is an ancestor
+FloatingPoint <: Number
+```
+
+
+
+
+    true
+
+
+
+
+```julia
+FloatingPoint <: AbstractArray
+```
+
+
+
+
+    false
+
+
+
+* You can make user defined types easy too (we'll see that in a second).
+* The type system is a bit more exposed in Julia than in matlab
+* The reason is multiple dispatch.
+* Instead of having the OO style where functions "live" with the objection or types, types and functions are seperated
+* To specify the behavor of a function on a new type or object, one can annotate the types of the arguments
+
+
+
+```julia
+# I'm defining 4 different versions of foo
+function foo(x::FloatingPoint, y::FloatingPoint)
+        println("foo(Float, Float) was called")
+        int(x * y)
+end
+
+function foo(x::Integer, y::Integer)
+        println("foo(Int, Int)  was called")
+        x * y
+end
+
+function foo(x, y) # fall back
+        println("fall back was called")
+        int(x .* y)
+end
+
+function foo(x)
+        foo(x, x)
+end
+```
+
+
+
+
+    foo (generic function with 4 methods)
+
+
+
+
+```julia
+foo(1, 1)
+```
+
+    foo(Int, Int)  was called
+
+
+
+
+
+    1
+
+
+
+
+```julia
+foo(2.0, 1)
+```
+
+    fall back was called
+
+
+
+
+
+    2
+
+
+
+
+```julia
+foo(2.0, 4.9)
+```
+
+    foo(Float, Float) was called
+
+
+
+
+
+    10
+
+
+
+
+```julia
+foo(2.0)
+```
+
+    foo(Float, Float) was called
+
+
+
+
+
+    4
+
+
+
+
+```julia
+foo(randn(15, 15))
+```
+
+    fall back was called
+
+
+
+
+
+    15x15 Array{Int64,2}:
+     2  0  0  1  2  0  1  1  0  1  0  1  0  0  0
+     4  2  5  0  2  1  2  0  2  0  0  6  0  0  0
+     0  0  2  0  2  0  0  1  0  1  0  2  1  2  1
+     0  1  0  2  0  2  4  1  4  2  0  0  2  3  1
+     3  0  0  0  1  0  0  0  0  0  3  0  0  1  2
+     2  0  1  3  0  0  1  0  0  0  0  2  0  0  0
+     0  0  0  0  0  0  1  0  0  0  0  4  2  2  3
+     1  0  0  2  0  0  0  0  1  2  0  0  0  1  2
+     1  1  6  0  0  0  0  0  0  1  0  0  1  0  1
+     0  1  0  2  0  0  0  2  0  1  1  2  0  2  1
+     1  0  1  0  0  2  0  0  0  7  3  1  1  0  0
+     1  2  0  0  0  1  0  2  4  2  0  0  0  0  0
+     2  0  1  0  0  6  0  0  0  0  0  1  3  2  5
+     0  0  0  0  4  0  0  0  1  0  0  3  8  1  1
+     0  0  6  1  2  4  1  2  2  0  0  0  1  0  0
+
+
+
+
+```julia
+methods(foo) # lists all the possible call signatiures
+```
+
+
+
+
+4 methods for generic function <b>foo</b>:<ul><li> foo(x::<b>FloatingPoint</b>,y::<b>FloatingPoint</b>) at In[79]:3<li> foo(x::<b>Integer</b>,y::<b>Integer</b>) at In[79]:8<li> foo(x,y) at In[79]:13<li> foo(x) at In[79]:18</ul>
+
+
+
+### Just-in-time compilation (JIT)
+
+* When foo(1, 1) is called it looks up the type signature of the arguments and decides which function to use
+* It also, checks to see if you have called that function with those same type arguments,
+* If not it tries to JIT complile it and will save that compiled version for the next time you use it with those same type of arguments
+
+
+
+```julia
+a = int(a)
+@time foo(a); # warm up Jit compile
+@time foo(a); # now we are using the Jit
+```
+
+    foo(Int, Int)  was called
+    elapsed time: 0.002378283 seconds (46160 bytes allocated)
+    foo(Int, Int)  was called
+    elapsed time: 3.3963e-5 seconds (600 bytes allocated)
+
+
+
+
+
+    1
+
+
+
+* So it is very easy to optimize some functions for different types of arguments.
+* but you need to write your code so Julia can infer the types to compile it
+* Note: Defining with type anotation like `foo(x::Float64, y::Int)` will be just as fast as `foo(x, y)`. In particular, when foo(Float64, Int) is called, it already knows the types of the arguments and will compile for that type signature.
+
+### Type stability
+When functions are not type stable, the JIT doesn't work (as effectively)
+
+
+```julia
+function baz(x) # not type stable
+        cntr = 0        # starts as as int
+        for i = 1:length(x)
+                if x[i] > 0
+                        cntr += 1.0 # depending on the run time values  might promote to a float
+                end
+        end
+        cntr
+end
+```
+
+
+
+
+    baz (generic function with 1 method)
+
+
+
+
+```julia
+function boo(x) # type stable
+        cntr = 0.0        # starts as as float
+        for i = 1:length(x)
+                if x[i] > 0
+            cntr += 1.0 # stays a float
+                end
+        end
+        cntr
+end
+```
+
+
+
+
+    boo (generic function with 1 method)
+
+
+
+
+```julia
+a = rand(10_000_000)
+@time baz(a);
+@time baz(a);
+@time boo(a);
+@time boo(a);
+```
+
+    elapsed time: 0.323940347 seconds (160105992 bytes allocated, 30.48% gc time)
+    elapsed time: 0.321823357 seconds (160000080 bytes allocated, 29.89% gc time)
+    elapsed time: 0.015575043 seconds (103672 bytes allocated)
+    elapsed time: 0.010601659 seconds (96 bytes allocated)
+
+
+### We can look under the hood at the type inference
+
+
+```julia
+g = @code_typed baz(a);
+g[1].args[2][2]
+```
+
+
+
+
+    12-element Array{Any,1}:
+     Any[:x,Array{Float64,1},0]              
+     Any[:cntr,Any,2]                        
+     Any[symbol("#s325"),UnitRange{Int64},18]
+     Any[symbol("#s326"),Int64,2]            
+     Any[symbol("#s327"),(Int64,Int64),18]   
+     Any[:i,Int64,18]                        
+     Any[:_var0,Int64,18]                    
+     Any[:_var3,Float64,18]                  
+     Any[:_var4,(Int64,),0]                  
+     Any[:_var5,Float64,18]                  
+     Any[:_var1,Int64,18]                    
+     Any[:_var2,Int64,18]                    
+
+
+
+
+```julia
+g = @code_typed boo(a);
+g[1].args[2][2]
+```
+
+
+
+
+    12-element Array{Any,1}:
+     Any[:x,Array{Float64,1},0]              
+     Any[:cntr,Float64,2]                    
+     Any[symbol("#s336"),UnitRange{Int64},18]
+     Any[symbol("#s337"),Int64,2]            
+     Any[symbol("#s338"),(Int64,Int64),18]   
+     Any[:i,Int64,18]                        
+     Any[:_var0,Int64,18]                    
+     Any[:_var3,Float64,18]                  
+     Any[:_var4,(Int64,),0]                  
+     Any[:_var5,Float64,18]                  
+     Any[:_var1,Int64,18]                    
+     Any[:_var2,Int64,18]                    
+
+
+
+### We can really look under the hood at the assembly code
+
+
+```julia
+@code_native baz(a);
+```
+
+    	.section	__TEXT,__text,regular,pure_instructions
+    Filename: In[87]
+    Source line: 2
+    	push	RBP
+    	mov	RBP, RSP
+    	push	R15
+    	push	R14
+    	push	R13
+    	push	R12
+    	push	RBX
+    	sub	RSP, 40
+    	mov	QWORD PTR [RBP - 80], 6
+    Source line: 2
+    	movabs	RCX, jl_pgcstack
+    	mov	RAX, QWORD PTR [RCX]
+    	mov	QWORD PTR [RBP - 72], RAX
+    	lea	RAX, QWORD PTR [RBP - 80]
+    	mov	QWORD PTR [RCX], RAX
+    	vxorpd	XMM0, XMM0, XMM0
+    	vmovupd	XMMWORD PTR [RBP - 64], XMM0
+    	mov	QWORD PTR [RBP - 48], 0
+    	mov	R13, QWORD PTR [RSI]
+    	movabs	RAX, 140326547726912
+    Source line: 2
+    	mov	QWORD PTR [RBP - 64], RAX
+    Source line: 3
+    	mov	R12, QWORD PTR [R13 + 16]
+    	test	R12, R12
+    	jle	L216
+    	movabs	RAX, 140326547726912
+    	xor	EBX, EBX
+    Source line: 5
+    	movabs	R15, jl_apply_generic
+    	xor	R14D, R14D
+    Source line: 4
+    L121:	cmp	R14, QWORD PTR [R13 + 16]
+    	jae	L248
+    	mov	RCX, QWORD PTR [R13 + 8]
+    Source line: 5
+    	sub	RCX, RBX
+    Source line: 4
+    	vmovsd	XMM0, QWORD PTR [RCX]
+    	vxorpd	XMM1, XMM1, XMM1
+    	vucomisd	XMM0, XMM1
+    	jbe	L200
+    Source line: 5
+    	mov	QWORD PTR [RBP - 56], RAX
+    	movabs	RAX, 140326749100544
+    	mov	QWORD PTR [RBP - 48], RAX
+    	movabs	RDI, 140326588357248
+    	lea	RSI, QWORD PTR [RBP - 56]
+    	mov	EDX, 2
+    	call	R15
+    	mov	QWORD PTR [RBP - 64], RAX
+    L200:	add	RBX, -8
+    	inc	R14
+    	cmp	R12, R14
+    	jne	L121
+    Source line: 8
+    L216:	mov	RCX, QWORD PTR [RBP - 72]
+    Source line: 2
+    	movabs	RDX, jl_pgcstack
+    Source line: 8
+    	mov	QWORD PTR [RDX], RCX
+    	add	RSP, 40
+    	pop	RBX
+    	pop	R12
+    	pop	R13
+    	pop	R14
+    	pop	R15
+    	pop	RBP
+    	ret
+    Source line: 4
+    L248:	movabs	RAX, jl_bounds_exception
+    	mov	RDI, QWORD PTR [RAX]
+    	movabs	RAX, jl_throw_with_superfluous_argument
+    	mov	ESI, 4
+    	call	RAX
+
+
+
+```julia
+@code_native boo(a);
+```
+
+    	.section	__TEXT,__text,regular,pure_instructions
+    Filename: In[88]
+    Source line: 3
+    	push	RBP
+    	mov	RBP, RSP
+    Source line: 3
+    	mov	R8, QWORD PTR [RDI + 16]
+    	vxorps	XMM0, XMM0, XMM0
+    	test	R8, R8
+    	jle	L101
+    Source line: 4
+    	mov	RCX, QWORD PTR [RDI + 16]
+    	vxorpd	XMM1, XMM1, XMM1
+    	xor	EDX, EDX
+    	movabs	RAX, 4699684064
+    	vmovsd	XMM2, QWORD PTR [RAX]
+    	xor	ESI, ESI
+    	vxorps	XMM0, XMM0, XMM0
+    L51:	cmp	RSI, RCX
+    	jae	L103
+    	mov	RAX, QWORD PTR [RDI + 8]
+    Source line: 5
+    	sub	RAX, RDX
+    Source line: 4
+    	vmovsd	XMM3, QWORD PTR [RAX]
+    	vucomisd	XMM3, XMM1
+    	jbe	L85
+    Source line: 5
+    	vaddsd	XMM0, XMM0, XMM2
+    L85:	add	RDX, -8
+    	inc	RSI
+    	cmp	R8, RSI
+    	jne	L51
+    Source line: 8
+    L101:	pop	RBP
+    	ret
+    Source line: 4
+    L103:	movabs	RAX, jl_bounds_exception
+    	mov	RDI, QWORD PTR [RAX]
+    	movabs	RAX, jl_throw_with_superfluous_argument
+    	mov	ESI, 4
+    	call	RAX
+
+
+### Julia has been designed, from the groud up, to make type inference easier
+* `(-1)^(1/2)` gives an error but `(-1+0im)^(1/2)` works (julia wants to be sure that `Int^Float` isn't sometimes complex)
+* `2^5` works, `2^(-5.0)` works but `2^(-5)` gives an error (julia wants to be sure that `Int^Int == Int`)
+
+### Method dispatch in action
+
+* A great example is the Distributions package
+
+
+```julia
+x = rand(10)
+mean(x), std(x)  # functions in Base Julia
+```
+
+
+
+
+    (0.5677932922214617,0.3868786276306973)
+
+
+
+
+```julia
+using Distributions
+λ, α, β = 5.5, 0.1, 0.9
+xrv = Beta(α, β) # creats an instance of a Beta random variable
+yrv = Poisson(λ) # creats  an instance of a Poisson
+zrv = Poisson(λ) # another instance
+typeof(xrv), typeof(yrv), typeof(zrv)
+```
+
+
+
+
+    (Distributions.Beta,Distributions.Poisson,Distributions.Poisson)
+
+
+
+
+```julia
+# mean is overloaded to give the random variable expected value.
+mean(xrv)  # expected value of a Beta(0.1, 0.9)
+```
+
+
+
+
+    0.1
+
+
+
+
+```julia
+# std is overloaded to give the random variable standard deviation
+std(zrv)   # std of a Poisson(5.5)
+```
+
+
+
+
+    2.345207879911715
+
+
+
+
+```julia
+# rand is overloaded to give random samples from yrv
+rand(yrv, 10)  # Poisson(5.5) samples
+```
+
+
+
+
+    10-element Array{Int64,1}:
+      4
+      7
+      5
+      6
+      8
+      7
+     10
+      4
+      7
+      3
+
+
+
+
+```julia
+@which mean(xrv) # check which method is called
+```
+
+
+
+
+mean(d::<b>Distributions.Beta</b>) at <a href="https://github.com/JuliaStats/Distributions.jl/tree/1db799f5cacc8083c9603a8f7ad47010e46d63c0/src/univariate/continuous/beta.jl#L26" target="_blank">/Users/ethananderes/.julia/v0.4/Distributions/src/univariate/continuous/beta.jl:26</a>
+
+
+
+
+```julia
+@edit mean(xrv)
+```
+
+
+```julia
+# If you have Julia source you can go directly to code
+# This is particularly useful when debugging (you can read the source to see what is going wrong)
+mean(["hi"])
+```
+
+
+    `/` has no method matching /(::ASCIIString, ::Int64)
+    while loading In[96], in expression starting on line 3
+
+
+
+     in mean at statistics.jl:17
+
+
+
+```julia
+# Lets see where the definition of mean to see what is going wrong
+edit("statistics.jl", 17)
+```
+
+# Writing fast code in Julia
+
+* Write most of you code in functions
+* Avoid globals (if you must use them, declare as `const` which can not change types)
+* Write type stable functions
+* Pre allocate arrays and use `for` loops
+* Optimize using the profiler
+
+# User defined types and metaprograming
+
+
+```julia
+# Here is how a user can defined a new type
+type Hmatrix
+        frstcol :: Vector{Float64} # field names and optional type annotation
+        lastcol :: Vector{Float64} # this is where type annotation is important for speed, want these to be concrete types
+end
+```
+
+
+```julia
+# instantiate two Hmatrices
+# basic default consructor
+anHmat = Hmatrix([1.0 ,2.0 ,3.0], [5.0 ,6.0, 7.0])
+bnHmat = Hmatrix([0.0 ,2.0 ,3.0], [0.0 ,6.0, 7.0])
+anHmat, bnHmat
+```
+
+
+
+
+    (Hmatrix([1.0,2.0,3.0],[5.0,6.0,7.0]),Hmatrix([0.0,2.0,3.0],[0.0,6.0,7.0]))
+
+
+
+
+```julia
+# getting the field values
+anHmat.frstcol
+anHmat.lastcol
+```
+
+
+
+
+    3-element Array{Float64,1}:
+     5.0
+     6.0
+     7.0
+
+
+
+
+```julia
+# use dispatch to generate other construtors
+Hmatrix(x::Vector{Float64}) = Hmatrix(x, copy(x))
+Hmatrix(x::Float64, d::Int64) = Hmatrix(fill(x,d))
+Heye(d::Int64) = Hmatrix(fill(1.0,d))
+```
+
+
+
+
+    Heye (generic function with 1 method)
+
+
+
+
+```julia
+# now I can define operations on Hmatrix
+import Base: sin, size
+sin(h::Hmatrix)  = Hmatrix(sin(h.frstcol), sin(h.lastcol))
+size(h::Hmatrix) = (length(h.frstcol), length(h.frstcol))
+sin(anHmat), size(anHmat)
+```
+
+
+
+
+    (Hmatrix([0.8414709848078965,0.9092974268256817,0.1411200080598672],[-0.9589242746631385,-0.27941549819892586,0.6569865987187891]),(3,3))
+
+
+
+
+```julia
+# this gets tedious after a while so I program over the language itself: metaprograming
+import Base: exp, abs, tan, log
+for op in [:exp, :abs, :tan, :log]
+        quote
+                $op(h::Hmatrix) = Hmatrix($op(h.frstcol), $op(h.lastcol))
+        end |> eval
+end
+abs(anHmat)
+tan(anHmat)
+```
+
+
+
+
+    Hmatrix([1.5574077246549023,-2.185039863261519,-0.1425465430742778],[-3.380515006246586,-0.29100619138474915,0.8714479827243187])
+
+
+
+
+```julia
+#  pairwise operations with Hmatrices
+import Base: .+, .-, .*, ./
+for op in [:.+, :.-, :.*, :./]
+        quote
+                function $op(h::Hmatrix, g::Hmatrix)
+                        frstcol = $op(h.frstcol, g.frstcol)
+                        lastcol = $op(h.lastcol, g.lastcol)
+                        return Hmatrix(frstcol, lastcol)
+                end
+        end |> eval
+end
+
+import Base: *
+function *(mat::Matrix, hmat::Hmatrix)
+        Hmatrix(mat * hmat.frstcol, mat * hmat.lastcol)
+end
+```
+
+
+
+
+    * (generic function with 128 methods)
+
+
+
+
+```julia
+# a pre-existing function on matrices which only used the above operations will automatically work on Hmatrices
+# I encountered this when a new type I had made, just worked on some Runge-Kutta code
+function expmm(mat)
+        mat .+ rand(size(mat)) * mat .+ (rand(size(mat)).^2) * mat
+end
+expmm(eye(2))
+expmm(anHmat)
+```
+
+
+
+
+    Hmatrix([4.2398945819873255,7.451526590534059,10.296718063246164],[17.231203663808984,24.554238383439273,26.346002561251257])
+
+
+
+
+```julia
+# I can make indexing work like regular arrays
+import Base: getindex
+function getindex(H::Hmatrix, i::Integer, j::Integer)
+        siz, _ = size(H)
+        if j == 1
+                return H.frstcol[i]
+        elseif j == siz
+                return H.lastcol[i]
+        else
+                return 0.0
+        end
+end
+anHmat
+```
+
+
+
+
+    Hmatrix([1.0,2.0,3.0],[5.0,6.0,7.0])
+
+
+
+
+```julia
+anHmat[1,2], anHmat[2,1]
+```
+
+
+
+
+    (0.0,2.0)
+
+
+
+
+```julia
+# ----- slighly more advanced, version
+# take a look at the source code
+@edit Symmetric(rand(3,3))
+```
+
+
+```julia
+immutable H2matrix{T} <: AbstractMatrix{T}
+        frstcol ::Vector{T}
+        lastcol ::Vector{T}
+end
+# defines a whole class of types: H2matrix{Float64}, H2matrix{Int64}...
+# these are ancestors of AbstractMatrix{T}
+# the fact that they are ancestors of AbstractArrays means that other function will just work.
+# moreover you can specialize fast methods if your working with H2matrix{Uint16}...for example
+```
+
+
+```julia
+# I can make indexing work like regular arrays
+import Base: getindex, size, length, sum
+size(h::H2matrix) = (length(h.frstcol), length(h.lastcol))
+length(h::H2matrix) = length(h.frstcol)^2
+function getindex{T}(H::H2matrix{T}, i::Integer, j::Integer)
+        siz, _ = size(H)
+        if j == 1
+            return H.frstcol[i]
+        elseif j == siz
+            return H.lastcol[i]
+        else
+            return convert(T, 0)
+        end
+end
+# in the above example, this is an easy way to specialize code based on the element type of H2matrix
+sum(h::H2matrix) = sum(h.frstcol) + sum(h.lastcol)
+```
+
+
+
+
+    sum (generic function with 19 methods)
+
+
+
+
+```julia
+# now stuff Just Works due to an ancestors of AbstractMatrix{T}
+anH2 = H2matrix(rand(5), rand(5)) # printing is inherited from AbstractMatrix{T}
+```
+
+
+
+
+    5x5 H2matrix{Float64}:
+     0.61784   0.0  0.0  0.0  0.753769
+     0.725311  0.0  0.0  0.0  0.610834
+     0.750703  0.0  0.0  0.0  0.0940795
+     0.959633  0.0  0.0  0.0  0.542028
+     0.794523  0.0  0.0  0.0  0.609586
+
+
+
+
+```julia
+anH2 = H2matrix([1,2,3], [3,2,1]) # spcialization for integer
+```
+
+
+
+
+    3x3 H2matrix{Int64}:
+     1  0  3
+     2  0  2
+     3  0  1
+
+
+
+
+```julia
+mean(anH2)
+```
+
+
+
+
+    1.3333333333333333
+
+
+
+
+```julia
+# how did this work?
+# check out source
+@edit mean([1.0, 2.0])
+# there is a fallback method for mean(A::AbstractArray) which only uses sum and length.
+# you can see how important it is to be able read look at Julia source
+# This wouldn't be possible if it wasn't both fast and readable at the same time
+```
+
+## Ploting with matplotlib using PyPlot
+
+
+```julia
+using PyPlot
+x = sin(1 ./ linspace(.05, 0.5, 1_000))
+plot(x, "r--")
+title("My Plot")
+ylabel("red curve")
+```
+
+
+![png](output_139_0.png)
+
+
+
+
+
+    PyObject <matplotlib.text.Text object at 0x1216b0310>
+
+
+
+
+```julia
+imshow(rand(100,100))
+```
+
+
+![png](output_140_0.png)
+
+
+
+
+
+    PyObject <matplotlib.image.AxesImage object at 0x121886150>
+
+
+
+## Using PyCall for missing libraries
+
+
+```julia
+using PyCall
+@pyimport scipy.interpolate as scii
+x = 1:10
+y = sin(x) + rand(10)/5
+iy = scii.UnivariateSpline(x, y, s = 0) # python object
+```
+
+
+
+
+    PyObject <scipy.interpolate.fitpack2.InterpolatedUnivariateSpline object at 0x1218b5c10>
+
+
+
+
+```julia
+# here is all the stuff in iy
+[println(k) for k in keys(iy)];
+```
+
+    __call__
+    __class__
+    __delattr__
+    __dict__
+    __doc__
+    __format__
+    __getattribute__
+    __hash__
+    __init__
+    __module__
+    __new__
+    __reduce__
+    __reduce_ex__
+    __repr__
+    __setattr__
+    __sizeof__
+    __str__
+    __subclasshook__
+    __weakref__
+    _data
+    _eval_args
+    _from_tck
+    _reset_class
+    _reset_nest
+    _set_class
+    _spline_class
+    antiderivative
+    derivative
+    derivatives
+    get_coeffs
+    get_knots
+    get_residual
+    integral
+    roots
+    set_smoothing_factor
+
+
+
+```julia
+# We want the field that gives us the spline function
+iy[:__call__]
+```
+
+
+
+
+    fn (generic function with 1 method)
+
+
+
+
+```julia
+yinterp(x) = iy[:__call__](x) # pull out the function part of iy
+xnew = linspace(2, 9, 1000)
+plot(xnew, yinterp(xnew))
+plot(x, y,"r*")
+```
+
+
+![png](output_145_0.png)
+
+
+
+
+
+    1-element Array{Any,1}:
+     PyObject <matplotlib.lines.Line2D object at 0x12326abd0>
+
+
+
+## Parallel stuff
+The current state is mostly totally distributed
+
+
+```julia
+jobs = [
+	"hilbert",
+	"hilbert",
+	"hilbert",
+	"hilbert",
+	"hilbert",
+	"gumbel",
+	"gumbel",
+	"gumbel",
+	"gumbel",
+	"gumbel",
+	"gumbel"
+]
+addprocs(jobs)
+
+# fully distributed so you  need to explicity send definitions to workers
+@everywhere function foo(x)
+	sum(x.^2)
+end
+@everywhere const parameter = 3.3
+
+out = @parallel (vcat) for r in 1:reps
+	x = rand(100)
+    # do stuff
+	foo(x)
+end
+
+closeprocs()
+```
+
+    ssh: Could not resolve hostname hilbert: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname hilbert: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname hilbert: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname hilbert: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname hilbert: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname gumbel: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname gumbel: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname gumbel: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname gumbel: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname gumbel: nodename nor servname provided, or not known
+    ssh: Could not resolve hostname gumbel: nodename nor servname provided, or not known
+
+
+## Shell scripting
+System commands are another data type in Julia which can programmed on.
+
+
+```julia
+for ν in [0.8, 1.2, 2.2], ρ in [0.05, 0.2], xmax in [1.2, 1.4]
+	run(`julia scripts/script1d/script1d.jl $ν $ρ $σ $prdc_sim $xmax`)
+end
+```
+
+## Macros
+
+
+```julia
+@time rand(100,100)
+```
+
+    elapsed time: 5.0806e-5 seconds (80160 bytes allocated)
+
+
+
+
+
+    100x100 Array{Float64,2}:
+     0.942451   0.748415   0.187403  …  0.613088   0.505338   0.544802  
+     0.585349   0.821453   0.199628     0.569679   0.155863   0.00905058
+     0.207085   0.249896   0.885351     0.867659   0.133463   0.712427  
+     0.30231    0.446604   0.921109     0.435325   0.744642   0.78002   
+     0.611015   0.815      0.971743     0.0723272  0.960842   0.387117  
+     0.483281   0.741589   0.936308  …  0.412948   0.392219   0.302308  
+     0.28979    0.740981   0.568358     0.59467    0.802575   0.113159  
+     0.946803   0.973996   0.859628     0.391024   0.874248   0.216545  
+     0.870929   0.166825   0.598869     0.482832   0.628466   0.031087  
+     0.318268   0.735127   0.865123     0.179363   0.175415   0.621527  
+     0.0270464  0.0245302  0.642016  …  0.273827   0.707571   0.561367  
+     0.149578   0.418345   0.530132     0.0040112  0.0364409  0.0961518
+     0.792014   0.0179258  0.678798     0.0998111  0.62811    0.401058  
+     ⋮                               ⋱                                  
+     0.49572    0.0417783  0.182956     0.780429   0.490779   0.234076  
+     0.144771   0.685323   0.577226     0.43212    0.570012   0.330991  
+     0.74064    0.396004   0.913277  …  0.101792   0.533215   0.963932  
+     0.178581   0.593957   0.726677     0.166717   0.45749    0.251565  
+     0.975848   0.480475   0.584662     0.596843   0.641639   0.0973685
+     0.873479   0.176377   0.526298     0.101842   0.500683   0.748125  
+     0.992935   0.523694   0.201667     0.93927    0.905392   0.30518   
+     0.305001   0.777044   0.301649  …  0.921344   0.528293   0.666326  
+     0.903264   0.371026   0.663196     0.519937   0.932916   0.605046  
+     0.339518   0.275977   0.889195     0.282742   0.547969   0.379636  
+     0.94685    0.243245   0.484614     0.305149   0.185698   0.550431  
+     0.996159   0.338154   0.165814     0.481142   0.758043   0.291418  
+
+
+
+## Closures
+
+
+```julia
+function clos(data)
+    # withing the function scope, data acts like a global variable
+    function loglike(μ)
+        -0.5 * sumabs2(data .- μ)
+	end
+	function updatedata(val)
+        push!(data, val)
+	end
+    loglike, updatedata # return the two functions
+end
+```
+
+
+
+
+    clos (generic function with 1 method)
+
+
+
+
+```julia
+like1, updatedata1 = clos(rand(10))
+# now the data is closed off to any mutations other than
+# those given by updatedata
+```
+
+
+
+
+    (loglike,updatedata)
+
+
+
+
+```julia
+using PyPlot
+[like1(μ) for μ=0.1:.1:3] |> x -> plot(0.1:.1:3, x)
+```
+
+
+![png](output_155_0.png)
+
+
+
+
+
+    1-element Array{Any,1}:
+     PyObject <matplotlib.lines.Line2D object at 0x12367d510>
+
+
+
+
+```julia
+updatedata1(10) # add 10 to the data set
+```
+
+
+
+
+    11-element Array{Float64,1}:
+      0.106992
+      0.590903
+      0.132579
+      0.426426
+      0.628013
+      0.107194
+      0.842213
+      0.400367
+      0.304086
+      0.486538
+     10.0     
+
+
+
+
+```julia
+[like1(μ) for μ=0.1:.1:3] |> x -> plot(0.1:.1:3, x)
+```
+
+
+![png](output_157_0.png)
+
+
+
+
+
+    1-element Array{Any,1}:
+     PyObject <matplotlib.lines.Line2D object at 0x123893990>
+
+
+
+## Optimization packages
+
+
+```julia
+# closures are useful for making passing a likelihood function to an optimization package
+
+```
