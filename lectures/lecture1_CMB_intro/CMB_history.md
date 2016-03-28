@@ -28,10 +28,8 @@ Holmdel Horn Antenna (60s)
 COBE (90s)
 ==============================================
 
-* Graph of cosmic microwave background spectrum measured by the FIRAS instrument on the COBE, the most precisely measured black body spectrum in nature. The error bars are too small to be seen even in an enlarged image, and it is impossible to distinguish the observed data from the theoretical curve.
+* 1990 – FIRAS on the Cosmic Background Explorer (COBE) satellite measures the black body form of the CMB spectrum with exquisite precision, and shows that the microwave background has a nearly perfect black-body spectrum and thereby strongly constrains the density of the intergalactic medium. The error bars are too small to be seen even in an enlarged image, and it is impossible to distinguish the observed data from the theoretical curve.
 
-
-* 1990 – FIRAS on the Cosmic Background Explorer (COBE) satellite measures the black body form of the CMB spectrum with exquisite precision, and shows that the microwave background has a nearly perfect black-body spectrum and thereby strongly constrains the density of the intergalactic medium.
 
 ![png](figures/COBE_blackbody.png)
 
