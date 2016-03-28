@@ -247,7 +247,7 @@ iy = scii.UnivariateSpline(x, y, s = 0) # python object
 
 Here is all the stuff in iy
 <<term=true>>=
-[println(k) for k in keys(iy)];
+[println(k) for k in keys(iy)]
 @
 
 
@@ -274,7 +274,7 @@ plot(x, y,"r*")
 <<term=true>>=
 x = rand(10)
 mean(x), std(x)  # functions in Base Julia
-<<term=true>>=
+@
 
 
 
@@ -287,7 +287,7 @@ xrv = Beta(α, β) # creats an instance of a Beta random variable
 yrv = Poisson(λ) # creats  an instance of a Poisson
 zrv = Poisson(λ) # another instance
 typeof(xrv), typeof(yrv), typeof(zrv)
-<<term=true>>=
+@
 
 
 
@@ -295,26 +295,26 @@ typeof(xrv), typeof(yrv), typeof(zrv)
 <<term=true>>=
 # mean is overloaded to give the random variable expected value.
 mean(xrv)  # expected value of a Beta(0.1, 0.9)
-<<term=true>>=
+@
 
 
 
 <<term=true>>=
 # std is overloaded to give the random variable standard deviation
 std(zrv)   # std of a Poisson(5.5)
-<<term=true>>=
+@
 
 
 <<term=true>>=
 # rand is overloaded to give random samples from yrv
 rand(yrv, 10)  # Poisson(5.5) samples
-<<term=true>>=
+@
 
 
 
 <<term=true>>=
 @which mean(xrv) # check which method is called
-<<term=true>>=
+@
 
 
 
