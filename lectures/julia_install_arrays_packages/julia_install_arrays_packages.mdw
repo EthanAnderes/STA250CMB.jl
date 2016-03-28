@@ -149,7 +149,7 @@ row   = [1  2  4  6]  # rows are two dimensional
 mat2[1, 2] # first row, second column
 mat2[1, :] # first row
 mat2[:, 2] # second column...trailing degenerate dimensions are removed
-mat2[1:3, 7:end] # matrix sub block
+mat2[1:2, 2:end] # matrix sub block
 mat2[:]  # stacks the columns
 @
 
@@ -171,7 +171,7 @@ Vectorize operations
 <<term=true>>=
 mat1 = eye(2)
 mat2 = randn(2,2)
-mat2 .^ 2 # .^ is coordinstewise power
+mat2 .^ 2 # .^ is elementwise power
 exp(mat2)
 mat1 .* mat2
 mat2 .<= 0
@@ -208,15 +208,14 @@ Packages in Julia are hosted on github. These are saved in `~/.julia/`. Download
 Pkg.add("Distributions")
 ```
 This only needs to be done once. Loading a package into a session is done with `using`.
-```julia
+<<term=true>>=
 using Distributions
 rand(Beta(1/2, 1/2), 10) # from the Distributions package
-```
+@
 Note that in the above code, the `rand` function is overloaded by `Distributions`.
 
 
 ### Ploting with matplotlib using PyPlot
-
 
 <<term=true>>=
 using PyPlot
@@ -247,7 +246,7 @@ iy = scii.UnivariateSpline(x, y, s = 0) # python object
 
 Here is all the stuff in iy
 <<term=true>>=
-[println(k) for k in keys(iy)]
+keys(iy)
 @
 
 
@@ -291,22 +290,20 @@ typeof(xrv), typeof(yrv), typeof(zrv)
 
 
 
-
+mean is overloaded by `Distributions` to give the expected value of the random variable.
 <<term=true>>=
-# mean is overloaded to give the random variable expected value.
 mean(xrv)  # expected value of a Beta(0.1, 0.9)
 @
 
 
-
+std is overloaded to give the random variable standard deviation
 <<term=true>>=
-# std is overloaded to give the random variable standard deviation
 std(zrv)   # std of a Poisson(5.5)
 @
 
 
+rand is overloaded to give random samples from yrv
 <<term=true>>=
-# rand is overloaded to give random samples from yrv
 rand(yrv, 10)  # Poisson(5.5) samples
 @
 
@@ -315,21 +312,3 @@ rand(yrv, 10)  # Poisson(5.5) samples
 <<term=true>>=
 @which mean(xrv) # check which method is called
 @
-
-
-
-```julia
-@edit mean(xrv)
-```
-
-
-```julia
-# If you have Julia source you can go directly to code
-# This is particularly useful when debugging (you can read the source to see what is going wrong)
-mean(["hi"])
-```
-
-```julia
-# Lets see where the definition of mean to see what is going wrong
-edit("statistics.jl", 17)
-```
