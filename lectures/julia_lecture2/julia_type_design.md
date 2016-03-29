@@ -1,7 +1,7 @@
 
 [](
 using Weave
-weave("gitignore/OnDeck/julia_lecture2/julia_type_design.mdw", plotlib="PyPlot", doctype="github")
+weave("lectures/julia_lecture2/julia_type_design.mdw", plotlib="PyPlot", doctype="github")
 )
 
 
@@ -230,16 +230,16 @@ julia> foo(2.0)
 
 julia> foo(randn(15, 15))
 15x15 Array{Int64,2}:
- 4  1  0  0  0  0  0  0  0  0  1  1  4  9  2
- 5  0  3  2  0  1  0  3  2  3  0  1  2  1  0
- 0  1  0  2  3  3  0  3  3  2  2  3  0  0  0
- 1  0  2  2  0  0  0  2  0  0  2  0  1  0  0
- 2  8  0  0  0  0  0  0  0  1  5  0  1  0  1
+ 0  1  3  2  0  0  0  0  6  0  1  0  2  0  2
+ 0  2  2  0  0  2  1  3  0  0  0  0  1  0  2
+ 0  0  0  2  0  2  0  0  2  0  0  1  1  0  1
+ 3  0  1  1  3  0  2  3  0  1  1  1  1  0  0
+ 1  1  2  3  0  0  0  0  1  2  0  0  0  2  0
  ⋮              ⋮              ⋮            
- 1  3  0  0  0  0  0  1  1  1  2  6  1  0  0
- 1  2  1  1  0  1  1  5  2  0  2  1  6  0  1
- 6  0  4  1  2  0  0  1  0  1  4  4  0  1  0
- 0  0  0  0  1  1  2  4  1  1  0  1  0  0  0
+ 0  2  0  2  0  0  0  0  2  1  0  1  0  0  0
+ 0  0  0  0  0  0  0  0  0  1  0  1  0  1  0
+ 3  2  0  0  0  0  1  0  6  0  0  0  2  0  1
+ 5  1  0  9  1  2  0  1  3  1  0  0  0  0  1
 
 ````
 
@@ -472,73 +472,350 @@ top(getfield))(GenSym(0),:stop)::Int64,1))::Bool)))) goto 2
 ### We can really look under the hood at the lowered code, the llvm code and assembly code
 
 For `baz`
-````julia
-julia> code_lowered(baz, (typeof(a),))
+```julia
+julia> @code_lowered baz(a)
 1-element Array{Any,1}:
- :($(Expr(:lambda, Any[:x], Any[Any[Any[:x,:Any,0],Any[:cntr,:Any,2],Any[symbol("#s13"),:Any,2],Any[:i,:Any,18]],Any[],2,Any[]], :(begin  # none, line 3:
-        cntr = 0 # none, line 4:
-        GenSym(0) = (Weave.ReportSandBox.colon)(1,(Weave.ReportSandBox.length)(x))
-        #s13 = (top(start))(GenSym(0))
-        unless (top(!))((top(done))(GenSym(0),#s13)) goto 1
-        2: 
-        GenSym(1) = (top(next))(GenSym(0),#s13)
+ :($(Expr(:lambda, Any[:x], Any[Any[Any[:x,:Any,0],Any[:cntr,:Any,2],Any[symbol("#s4"),:Any,2],Any[:i,:Any,18]],Any[],2,Any[]], :(begin  # none, line 2:
+        cntr = 0 # none, line 3:
+        GenSym(0) = (Main.colon)(1,(Main.length)(x))
+        #s4 = (top(start))(GenSym(0))
+        unless (top(!))((top(done))(GenSym(0),#s4)) goto 1
+        2:
+        GenSym(1) = (top(next))(GenSym(0),#s4)
         i = (top(getfield))(GenSym(1),1)
-        #s13 = (top(getfield))(GenSym(1),2) # none, line 5:
-        unless (Weave.ReportSandBox.getindex)(x,i) > 0 goto 4 # none, line 6:
+        #s4 = (top(getfield))(GenSym(1),2) # none, line 4:
+        unless (Main.getindex)(x,i) > 0 goto 4 # none, line 5:
         cntr = cntr + 1.0
-        4: 
-        3: 
-        unless (top(!))((top(!))((top(done))(GenSym(0),#s13))) goto 2
-        1: 
-        0:  # none, line 9:
+        4:
+        3:
+        unless (top(!))((top(!))((top(done))(GenSym(0),#s4))) goto 2
+        1:
+        0:  # none, line 8:
         return cntr
     end))))
+```
 
-julia> code_llvm(baz, (typeof(a),))
+```julia
+julia> @code_llvm baz(a)
 
-julia> code_native(baz, (typeof(a),))
+define %jl_value_t* @julia_baz_21597(%jl_value_t*, %jl_value_t**, i32) {
+top:
+  %3 = alloca [5 x %jl_value_t*], align 8
+  %.sub = getelementptr inbounds [5 x %jl_value_t*]* %3, i64 0, i64 0
+  %4 = getelementptr [5 x %jl_value_t*]* %3, i64 0, i64 2
+  %5 = getelementptr [5 x %jl_value_t*]* %3, i64 0, i64 3
+  store %jl_value_t* inttoptr (i64 6 to %jl_value_t*), %jl_value_t** %.sub, align 8
+  %6 = load %jl_value_t*** @jl_pgcstack, align 8
+  %7 = getelementptr [5 x %jl_value_t*]* %3, i64 0, i64 1
+  %.c = bitcast %jl_value_t** %6 to %jl_value_t*
+  store %jl_value_t* %.c, %jl_value_t** %7, align 8
+  store %jl_value_t** %.sub, %jl_value_t*** @jl_pgcstack, align 8
+  store %jl_value_t* null, %jl_value_t** %4, align 8
+  store %jl_value_t* null, %jl_value_t** %5, align 8
+  %8 = getelementptr [5 x %jl_value_t*]* %3, i64 0, i64 4
+  store %jl_value_t* null, %jl_value_t** %8, align 8
+  %9 = load %jl_value_t** %1, align 8
+  store %jl_value_t* inttoptr (i64 4352729168 to %jl_value_t*), %jl_value_t** %4, align 8
+  %10 = getelementptr inbounds %jl_value_t* %9, i64 1
+  %11 = bitcast %jl_value_t* %10 to i64*
+  %12 = load i64* %11, align 8
+  %13 = icmp sgt i64 %12, 0
+  %14 = select i1 %13, i64 %12, i64 0
+  %15 = icmp eq i64 %14, 0
+  br i1 %15, label %L4, label %L.preheader
 
-````
+L.preheader:                                      ; preds = %top
+  %16 = bitcast %jl_value_t* %9 to i8**
+  br label %L
+
+L:                                                ; preds = %L2, %L.preheader
+  %17 = phi %jl_value_t* [ %28, %L2 ], [ inttoptr (i64 4352729168 to %jl_value_t*), %L.preheader ]
+  %"#s4.0" = phi i64 [ %29, %L2 ], [ 1, %L.preheader ]
+  %18 = add i64 %"#s4.0", -1
+  %19 = load i64* %11, align 8
+  %20 = icmp ult i64 %18, %19
+  br i1 %20, label %idxend, label %oob
+
+oob:                                              ; preds = %L
+  %21 = alloca i64, align 8
+  store i64 %"#s4.0", i64* %21, align 8
+  call void @jl_bounds_error_ints(%jl_value_t* %9, i64* %21, i64 1)
+  unreachable
+
+idxend:                                           ; preds = %L
+  %22 = load i8** %16, align 8
+  %23 = bitcast i8* %22 to double*
+  %24 = getelementptr double* %23, i64 %18
+  %25 = load double* %24, align 8
+  %26 = fcmp ule double %25, 0.000000e+00
+  br i1 %26, label %L2, label %if1
+
+if1:                                              ; preds = %idxend
+  store %jl_value_t* %17, %jl_value_t** %5, align 8
+  store %jl_value_t* inttoptr (i64 4409663568 to %jl_value_t*), %jl_value_t** %8, align 8
+  %27 = call %jl_value_t* @jl_apply_generic(%jl_value_t* inttoptr (i64 4362610928 to %jl_value_t*), %jl_value_t** %5, i32 2)
+  store %jl_value_t* %27, %jl_value_t** %4, align 8
+  br label %L2
+
+L2:                                               ; preds = %if1, %idxend
+  %28 = phi %jl_value_t* [ %27, %if1 ], [ %17, %idxend ]
+  %29 = add i64 %"#s4.0", 1
+  %30 = icmp eq i64 %"#s4.0", %14
+  br i1 %30, label %L4, label %L
+
+L4:                                               ; preds = %L2, %top
+  %31 = phi %jl_value_t* [ inttoptr (i64 4352729168 to %jl_value_t*), %top ], [ %28, %L2 ]
+  %32 = load %jl_value_t** %7, align 8
+  %33 = getelementptr inbounds %jl_value_t* %32, i64 0, i32 0
+  store %jl_value_t** %33, %jl_value_t*** @jl_pgcstack, align 8
+  ret %jl_value_t* %31
+}
+```
 
 
+```julia
+julia> @code_native baz(a)
+	.section	__TEXT,__text,regular,pure_instructions
+Filename: none
+Source line: 2
+	pushq	%rbp
+	movq	%rsp, %rbp
+Source line: 2
+	pushq	%r15
+	pushq	%r14
+	pushq	%r13
+	pushq	%r12
+	pushq	%rbx
+	subq	$40, %rsp
+	movq	$6, -80(%rbp)
+	movabsq	$jl_pgcstack, %rcx
+	movq	(%rcx), %rax
+	movq	%rax, -72(%rbp)
+	leaq	-80(%rbp), %rax
+	movq	%rax, (%rcx)
+	vxorpd	%xmm0, %xmm0, %xmm0
+	vmovupd	%xmm0, -64(%rbp)
+	movq	$0, -48(%rbp)
+	movq	(%rsi), %r12
+	movabsq	$4352729168, %rax       ## imm = 0x103716050
+	xorl	%ebx, %ebx
+Source line: 2
+	movq	%rax, -64(%rbp)
+Source line: 3
+	movq	8(%r12), %r13
+	testq	%r13, %r13
+	movl	$0, %ecx
+	cmovnsq	%r13, %rcx
+	testq	%rcx, %rcx
+	je	L247
+Source line: 5
+	testq	%r13, %r13
+	cmovsq	%rbx, %r13
+Source line: 3
+	negq	%r13
+	movabsq	$4352729168, %rax       ## imm = 0x103716050
+Source line: 5
+	movabsq	$jl_apply_generic, %r15
+	xorl	%r14d, %r14d
+Source line: 4
+L144:	cmpq	8(%r12), %rbx
+	jae	L279
+Source line: 5
+	leaq	(,%r14,8), %rcx
+Source line: 4
+	movq	(%r12), %rdx
+Source line: 5
+	subq	%rcx, %rdx
+Source line: 4
+	vmovsd	(%rdx), %xmm0
+	vxorpd	%xmm1, %xmm1, %xmm1
+	vucomisd	%xmm1, %xmm0
+	jbe	L232
+Source line: 5
+	movq	%rax, -56(%rbp)
+	movabsq	$4409663568, %rax       ## imm = 0x106D62050
+	movq	%rax, -48(%rbp)
+	movabsq	$4362610928, %rdi       ## imm = 0x1040828F0
+Source line: 2
+	leaq	-56(%rbp), %rsi
+	movl	$2, %edx
+Source line: 5
+	callq	*%r15
+	movq	%rax, -64(%rbp)
+L232:	incq	%rbx
+	decq	%r14
+	cmpq	%r14, %r13
+	jne	L144
+Source line: 8
+L247:	movq	-72(%rbp), %rcx
+Source line: 2
+	movabsq	$jl_pgcstack, %rdx
+Source line: 8
+	movq	%rcx, (%rdx)
+	leaq	-40(%rbp), %rsp
+	popq	%rbx
+	popq	%r12
+	popq	%r13
+	popq	%r14
+	popq	%r15
+	popq	%rbp
+	ret
+L279:	movl	$1, %eax
+Source line: 4
+	subq	%r14, %rax
+	movq	%rsp, %rcx
+	leaq	-16(%rcx), %rsi
+	movq	%rsi, %rsp
+	movq	%rax, -16(%rcx)
+	movabsq	$jl_bounds_error_ints, %rax
+	movq	%r12, %rdi
+	movl	$1, %edx
+	callq	*%rax
+```
 
-
-Note in the above code you can also do `@code_lowered boo(a)`, `@code_llvm boo(a)`, `@code_native boo(a)`
-but I couldn't get it to print out correctly.
 
 
 For `boo`
-````julia
-julia> code_lowered(boo, (typeof(a),))
+```julia
+julia> @code_lowered boo(a)
 1-element Array{Any,1}:
- :($(Expr(:lambda, Any[:x], Any[Any[Any[:x,:Any,0],Any[:cntr,:Any,2],Any[symbol("#s13"),:Any,2],Any[:i,:Any,18]],Any[],2,Any[]], :(begin  # none, line 3:
-        cntr = 0.0 # none, line 4:
-        GenSym(0) = (Weave.ReportSandBox.colon)(1,(Weave.ReportSandBox.length)(x))
-        #s13 = (top(start))(GenSym(0))
-        unless (top(!))((top(done))(GenSym(0),#s13)) goto 1
-        2: 
-        GenSym(1) = (top(next))(GenSym(0),#s13)
+ :($(Expr(:lambda, Any[:x], Any[Any[Any[:x,:Any,0],Any[:cntr,:Any,2],Any[symbol("#s4"),:Any,2],Any[:i,:Any,18]],Any[],2,Any[]], :(begin  # none, line 2:
+        cntr = 0.0 # none, line 3:
+        GenSym(0) = (Main.colon)(1,(Main.length)(x))
+        #s4 = (top(start))(GenSym(0))
+        unless (top(!))((top(done))(GenSym(0),#s4)) goto 1
+        2:
+        GenSym(1) = (top(next))(GenSym(0),#s4)
         i = (top(getfield))(GenSym(1),1)
-        #s13 = (top(getfield))(GenSym(1),2) # none, line 5:
-        unless (Weave.ReportSandBox.getindex)(x,i) > 0 goto 4 # none, line 6:
+        #s4 = (top(getfield))(GenSym(1),2) # none, line 4:
+        unless (Main.getindex)(x,i) > 0 goto 4 # none, line 5:
         cntr = cntr + 1.0
-        4: 
-        3: 
-        unless (top(!))((top(!))((top(done))(GenSym(0),#s13))) goto 2
-        1: 
-        0:  # none, line 9:
+        4:
+        3:
+        unless (top(!))((top(!))((top(done))(GenSym(0),#s4))) goto 2
+        1:
+        0:  # none, line 8:
         return cntr
     end))))
-
-julia> code_llvm(boo, (typeof(a),))
-
-julia> code_native(boo, (typeof(a),))
-
-````
+```
 
 
+```julia
+julia> @code_llvm boo(a)
 
+define double @julia_boo_21605(%jl_value_t*) {
+top:
+  %1 = getelementptr inbounds %jl_value_t* %0, i64 1
+  %2 = bitcast %jl_value_t* %1 to i64*
+  %3 = load i64* %2, align 8
+  %4 = icmp sgt i64 %3, 0
+  %5 = select i1 %4, i64 %3, i64 0
+  %6 = icmp eq i64 %5, 0
+  br i1 %6, label %L4, label %L.preheader
 
+L.preheader:                                      ; preds = %top
+  %7 = load i64* %2, align 8
+  %8 = bitcast %jl_value_t* %0 to i8**
+  br label %L
+
+L:                                                ; preds = %L2, %L.preheader
+  %"#s4.0" = phi i64 [ %18, %L2 ], [ 1, %L.preheader ]
+  %cntr.0 = phi double [ %cntr.1, %L2 ], [ 0.000000e+00, %L.preheader ]
+  %9 = add i64 %"#s4.0", -1
+  %10 = icmp ult i64 %9, %7
+  br i1 %10, label %idxend, label %oob
+
+oob:                                              ; preds = %L
+  %11 = alloca i64, align 8
+  store i64 %"#s4.0", i64* %11, align 8
+  call void @jl_bounds_error_ints(%jl_value_t* %0, i64* %11, i64 1)
+  unreachable
+
+idxend:                                           ; preds = %L
+  %12 = load i8** %8, align 8
+  %13 = bitcast i8* %12 to double*
+  %14 = getelementptr double* %13, i64 %9
+  %15 = load double* %14, align 8
+  %16 = fcmp ule double %15, 0.000000e+00
+  br i1 %16, label %L2, label %if1
+
+if1:                                              ; preds = %idxend
+  %17 = fadd double %cntr.0, 1.000000e+00
+  br label %L2
+
+L2:                                               ; preds = %if1, %idxend
+  %cntr.1 = phi double [ %cntr.0, %idxend ], [ %17, %if1 ]
+  %18 = add i64 %"#s4.0", 1
+  %19 = icmp eq i64 %"#s4.0", %5
+  br i1 %19, label %L4, label %L
+
+L4:                                               ; preds = %L2, %top
+  %cntr.2 = phi double [ 0.000000e+00, %top ], [ %cntr.1, %L2 ]
+  ret double %cntr.2
+}
+```
+
+```julia
+julia> @code_native boo(a)
+	.section	__TEXT,__text,regular,pure_instructions
+Filename: none
+Source line: 3
+	pushq	%rbp
+	movq	%rsp, %rbp
+Source line: 3
+	movq	8(%rdi), %r9
+	xorl	%ecx, %ecx
+	testq	%r9, %r9
+	movl	$0, %edx
+	cmovnsq	%r9, %rdx
+	vxorps	%xmm0, %xmm0, %xmm0
+	testq	%rdx, %rdx
+	je	L129
+Source line: 5
+	testq	%r9, %r9
+	cmovsq	%rcx, %r9
+Source line: 3
+	negq	%r9
+Source line: 4
+	movq	8(%rdi), %r8
+	vxorpd	%xmm1, %xmm1, %xmm1
+	movabsq	$12960071136, %rax      ## imm = 0x3047AFDE0
+	vmovsd	(%rax), %xmm2
+	xorl	%esi, %esi
+	vxorps	%xmm0, %xmm0, %xmm0
+L73:	cmpq	%r8, %rcx
+	jae	L134
+Source line: 5
+	leaq	(,%rsi,8), %rdx
+Source line: 4
+	movq	(%rdi), %rax
+Source line: 5
+	subq	%rdx, %rax
+Source line: 4
+	vmovsd	(%rax), %xmm3
+	vucomisd	%xmm1, %xmm3
+	jbe	L114
+Source line: 5
+	vaddsd	%xmm2, %xmm0, %xmm0
+L114:	incq	%rcx
+	decq	%rsi
+	cmpq	%rsi, %r9
+	jne	L73
+Source line: 8
+L129:	movq	%rbp, %rsp
+	popq	%rbp
+	ret
+L134:	movl	$1, %eax
+Source line: 4
+	subq	%rsi, %rax
+	movq	%rsp, %rcx
+	leaq	-16(%rcx), %rsi
+	movq	%rsi, %rsp
+	movq	%rax, -16(%rcx)
+	movabsq	$jl_bounds_error_ints, %rax
+	movl	$1, %edx
+	callq	*%rax
+```
 
 
 
@@ -578,19 +855,19 @@ it is only known that `b` is a Float64. I.e. the type of `a` depends on the run-
 ````julia
 julia> x = rand(10)
 10-element Array{Float64,1}:
- 0.0962517
- 0.665146 
- 0.031337 
- 0.679928 
- 0.567378 
- 0.624417 
- 0.348078 
- 0.643659 
- 0.178145 
- 0.270182 
+ 0.0770753
+ 0.376324 
+ 0.695339 
+ 0.802617 
+ 0.0543585
+ 0.549968 
+ 0.453883 
+ 0.86412  
+ 0.575311 
+ 0.625609 
 
 julia> mean(x), std(x)  # functions in Base Julia
-(0.41045232517670505,0.25435371003593216)
+(0.5074604762847319,0.2749933137000953)
 
 ````
 
@@ -654,15 +931,15 @@ julia> std(zrv)   # std of a Poisson(5.5)
 ````julia
 julia> rand(yrv, 10)  # Poisson(5.5) samples
 10-element Array{Int64,1}:
- 8
- 3
- 7
- 3
- 2
- 2
- 3
  5
- 4
+ 6
+ 8
+ 7
+ 2
+ 3
+ 6
+ 7
+ 8
  5
 
 ````
@@ -881,11 +1158,11 @@ expmm (generic function with 1 method)
 
 julia> expmm(eye(2))
 2x2 Array{Float64,2}:
- 1.04533  1.02656
- 1.02151  1.85942
+ 2.2199    1.5633 
+ 0.133465  2.41257
 
 julia> expmm(anHmat)
-Weave.ReportSandBox.Hmatrix([4.811256679335988,5.414900889041469,6.569048156197742],[17.11599362540062,18.081710059272083,17.523521210990324])
+Weave.ReportSandBox.Hmatrix([6.809995595868031,8.473285216321411,6.495295503604809],[22.264488478479493,25.17890065784258,18.38351232398207])
 
 ````
 
@@ -993,11 +1270,11 @@ Now stuff "Just Works" due to an ancestors of AbstractMatrix{T}
 ````julia
 julia> anH2 = H2matrix(rand(5), rand(5)) # printing is inherited from AbstractMatrix{T}
 5x5 Weave.ReportSandBox.H2matrix{Float64}:
- 0.778857  0.0  0.0  0.0  0.51954  
- 0.766358  0.0  0.0  0.0  0.680816 
- 0.276787  0.0  0.0  0.0  0.21632  
- 0.924659  0.0  0.0  0.0  0.0166243
- 0.488021  0.0  0.0  0.0  0.388994 
+ 0.0693355  0.0  0.0  0.0  0.781221
+ 0.701008   0.0  0.0  0.0  0.805297
+ 0.219444   0.0  0.0  0.0  0.878577
+ 0.0990448  0.0  0.0  0.0  0.687196
+ 0.56585    0.0  0.0  0.0  0.194152
 
 ````
 
