@@ -1,5 +1,5 @@
 
-[](weave("lectures/julia_lecture1/julia_install_arrays_packages.mdw", plotlib="PyPlot", doctype="github"))
+[](weave("lectures/julia_lecture1/julia_install_arrays_packages.mdw", plotlib="PyPlot", doctype="github")
 
 
 #  Why I'm excited about Julia
@@ -158,7 +158,7 @@ julia> mat1 = [1.1 2.0 3; 4 5 6] # a matrix.
 
 julia> mat2 = randn(3,4)  # a matrix with N(0,1) entries.
 3x4 Array{Float64,2}:
-  0.334835  -0.0387339   1.90513   0.917596 
+  0.334835  -0.0387339   1.90513   0.917596
   0.187311  -0.789559   -0.319016  0.0708397
  -1.27428   -0.414856   -0.475975  1.06085  
 
@@ -204,25 +204,25 @@ julia> mat2[1, :] # first row
 julia> mat2[:, 2] # second column...trailing degenerate dimensions are removed
 3-element Array{Float64,1}:
  -0.0387339
- -0.789559 
- -0.414856 
+ -0.789559
+ -0.414856
 
 julia> mat2[1:2, 2:end] # matrix sub block
 2x3 Array{Float64,2}:
- -0.0387339   1.90513   0.917596 
+ -0.0387339   1.90513   0.917596
  -0.789559   -0.319016  0.0708397
 
 julia> mat2[:]  # stacks the columns
 12-element Array{Float64,1}:
-  0.334835 
-  0.187311 
+  0.334835
+  0.187311
  -1.27428  
  -0.0387339
- -0.789559 
+ -0.789559
   ⋮        
- -0.319016 
- -0.475975 
-  0.917596 
+ -0.319016
+ -0.475975
+  0.917596
   0.0708397
   1.06085  
 
@@ -261,7 +261,7 @@ julia> mat5
 
 julia> mat5[:]   = rand(2,3)  # replace all entries of mat5 with U(0,1) entries
 2x3 Array{Float64,2}:
- 0.991557  0.773438  0.80337 
+ 0.991557  0.773438  0.80337
  0.626799  0.38602   0.911578
 
 ````
@@ -292,7 +292,7 @@ julia> mat2 .^ 2 # .^ is elementwise power
 julia> exp(mat2)
 2x2 Array{Float64,2}:
  0.743972   3.68424
- 3.42277   13.9985 
+ 3.42277   13.9985
 
 julia> mat1 .* mat2
 2x2 Array{Float64,2}:
@@ -361,9 +361,9 @@ julia> d, v = eig(mat2)
 
 julia> u  = chol(mat2)
 3x3 UpperTriangular{Float64,Array{Float64,2}}:
- 0.724206  0.613067  0.710669 
+ 0.724206  0.613067  0.710669
  0.0       0.679212  0.0758433
- 0.0       0.0       0.337251 
+ 0.0       0.0       0.337251
 
 julia> l  = chol(mat2, Val{:L})
 3x3 LowerTriangular{Float64,Array{Float64,2}}:
@@ -395,16 +395,16 @@ julia> using Distributions
 
 julia> rand(Beta(1/2, 1/2), 10) # from the Distributions package
 10-element Array{Float64,1}:
- 0.565015 
- 0.852367 
- 0.210191 
- 0.285482 
+ 0.565015
+ 0.852367
+ 0.210191
+ 0.285482
  0.0107757
  0.85996  
- 0.391876 
- 0.950534 
- 0.195532 
- 0.944218 
+ 0.391876
+ 0.950534
+ 0.195532
+ 0.944218
 
 ````
 
@@ -424,7 +424,7 @@ julia> x = sin(1 ./ linspace(.05, 0.5, 1_000))
  0.912945
  0.825943
  0.714887
- 0.58439 
+ 0.58439
  0.439275
  ⋮       
  0.906264
@@ -479,7 +479,7 @@ julia> x = 1:10
 julia> y = sin(x) + rand(10)/5
 10-element Array{Float64,1}:
   0.938935
-  1.05298 
+  1.05298
   0.145303
  -0.687687
  -0.932236
@@ -565,15 +565,15 @@ julia> plot(x, y,"r*")
 ````julia
 julia> x = rand(10)
 10-element Array{Float64,1}:
- 0.425072 
- 0.228708 
+ 0.425072
+ 0.228708
  0.0485751
- 0.119317 
- 0.804846 
+ 0.119317
+ 0.804846
  0.97581  
  0.6271   
- 0.485521 
- 0.691898 
+ 0.485521
+ 0.691898
  0.12989  
 
 julia> mean(x), std(x)  # functions in Base Julia
@@ -667,7 +667,3 @@ julia> @which mean(xrv) # check which method is called
 mean(d::Distributions.Beta) at /Users/ethananderes/.julia/v0.4/Distributions/src/univariate/continuous/beta.jl:22
 
 ````
-
-
-
-
