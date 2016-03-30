@@ -84,15 +84,6 @@ end
 
 
 
-import Base.show
-function Base.show{dm, T}(io::IO, parms::FFTgrid{dm, T})
-	for vs in fieldnames(parms)
-		(vs != :FFT) && (vs != :IFFT) && println(io, "$vs => $(getfield(parms,vs))")
-		println("")
-	end
-end
-
-
 
 # -------- converting from pixel noise std to noise per-unit pixel
 σunit_to_σpixl(σunit, deltx, dm) = σunit / √(deltx ^ dm)
