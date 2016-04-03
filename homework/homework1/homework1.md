@@ -31,13 +31,13 @@ julia> x1d_obs    = h5read("data_set1.h5", "x1d_obs")
 50-element Array{Float64,1}:
  0.0215986
  0.0464096
- 0.127262 
- 0.127378 
- 0.162191 
+ 0.127262
+ 0.127378
+ 0.162191
  ⋮        
- 0.943566 
- 0.950426 
- 0.973488 
+ 0.943566
+ 0.950426
+ 0.973488
  0.99185  
 
 julia> x2d_obs    = h5read("data_set2.h5", "x2d_obs")
@@ -48,36 +48,36 @@ julia> x2d_obs    = h5read("data_set2.h5", "x2d_obs")
  0.784455  0.730485
  0.470589  0.611858
  ⋮                 
- 0.705097  0.23109 
+ 0.705097  0.23109
  0.477765  0.321652
  0.949496  0.407473
  0.347244  0.802329
 
 julia> fx1d_obs   = h5read("data_set1.h5", "fx1d_obs")
 50-element Array{Float64,1}:
- 1.03875 
+ 1.03875
  0.305059
  0.938164
  0.985229
  0.534021
  ⋮       
- 1.05218 
+ 1.05218
  0.988185
- 1.03088 
- 0.79018 
+ 1.03088
+ 0.79018
 
 julia> fx2d_obs   = h5read("data_set2.h5", "fx2d_obs")
 50-element Array{Float64,1}:
  -0.300057
-  1.13975 
+  1.13975
  -0.138776
   0.469284
   0.719076
   ⋮       
-  0.45747 
+  0.45747
   0.753197
- -1.26907 
-  1.13239 
+ -1.26907
+  1.13239
 
 ````
 
@@ -175,7 +175,7 @@ Here is a plot of a conditional simulation of $f(x,y)$ on the same grid.
 
 ## What you need to do
 
-Your assignment is to reproduce the above plots using each one of the above covariance models for $f$ (they don't have to look exactly the same but basically show the same thing).
+Your assignment is to reproduce the above plots using each one of the above covariance models for $f$ (they don't have to look exactly the same but basically show the same thing). Also, compute the log likelihood of the data under each one of the three covariance models above and see if you can determine which covariance model I used to generate the data.
 
 ## Tips
 
