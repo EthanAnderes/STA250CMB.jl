@@ -1,7 +1,7 @@
 
 [](
 using Weave
-weave("homework1.mdw", plotlib="PyPlot", doctype="github")
+weave("homework1.mdw", plotlib="PyPlot", doctype="pandoc")
 )
 
 # Homework 1 (due April 11)
@@ -252,8 +252,8 @@ Note: I used comprehensions for the 1-d case but explicity wrote the loop in the
 When writing fast code in Julia you need to make sure your code is type stable. There is an easy way to check this
 with the macro `@code_warntype` which tells you what types Julia was able to infer for the variables in your functions.
 
-<<term=true>>
+```julia
 @code_warntype ΣcrossΣpre(xmesh, ymesh, x2d_obs)
-@
+```
 
  If you see any `Any` in the `Variables:` section then you have type *instability* (which is bad).
