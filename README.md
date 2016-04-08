@@ -2,15 +2,11 @@
 ### UC Davis, spring 2016
 
 
-#### Instructor:  
+#### Instructor:
 Ethan Anderes (from the Department of Statistics)
-
-#### Units:
-4.0
-
-#### Lectures:
+#### Units: 4.0
+#### Lectures: 
 2:10pm - 4pm MW in Haring Hall 1204
-
 #### Grading:
 Coding projects (written in Julia) and a final project/presentation.
 
