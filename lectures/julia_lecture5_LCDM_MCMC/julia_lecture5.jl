@@ -7,7 +7,7 @@ link      = "http://lambda.gsfc.nasa.gov/data/map/dr5/dcp/chains/wmap_lcdm_wmap9
 wmap_path = "/Users/ethananderes/Dropbox/Courses/STA250CMB/data/wmap_chain"
 # run(`tar -xf wmap_lcdm_wmap9_chains_v5.tar --directory $wmap_path`)
 # run(`rm wmap_lcdm_wmap9_chains_v5.tar`)
-run(`head $wmap_path/omegach2`)
+# run(`head $wmap_path/omegach2`)
 nlines = countlines("$wmap_path/omegach2")
 
 # It appears this doesn't work since there are both a column of integers and floats
@@ -25,8 +25,20 @@ n_s_chain         = readdlm("$wmap_path/ns002")[1:nchain,2]
 full_chain    = hcat(omega_b_chain, omega_cdm_chain, tau_reio_chain, theta_s_chain, A_s_109_chain, n_s_chain)
 names_chain   = [:omega_b, :omega_cdm, :tau_reio, :theta_s, :A_s_109, :n_s]
 Σwmap         = cov(full_chain)
-wmap_best_fit = mean(full_chain,1)
+wmap_best_fit = vec(mean(full_chain,1))
 
+subplot(3,1,1)
+plot(omega_b_chain[1:100:end], label = "omega_b_chain")
+xlabel("iteration")
+legend()
+subplot(3,1,2)
+plot(theta_s_chain[1:100:end], label = "theta_s_chain")
+xlabel("iteration")
+legend()
+subplot(3,1,3)
+plot(n_s_chain[1:100:end], label = "n_s_chain")
+xlabel("iteration")
+legend()
 
 #= ###############################
 
@@ -61,7 +73,11 @@ function pico(x)
         symbol("scalar_nrun(1)") => 0.0,
         :force     => true
     )
-    return plout["cl_TT"]::Array{Float64,1}
+    clTT::Array{Float64,1} = plout["cl_TT"]
+    ells   = 0:length(clTT)-1
+    clTT .*= 2π ./ ells ./ (ells + 1)
+    clTT[1] = 0.0
+    return clTT
 end
 
 
@@ -86,13 +102,15 @@ Generate some fake data
 
 =# ##############################
 
-using PyPlot
+using PyPlot, HDF5
 
 #beam and spectral density are set to approximately match WMAP
-σ² = (10.0)^2
+σ² = (10.0/3437.75)^2    #<--- noise level for a unit radian pixel (1 radian = 3437.75 arcmin)
 b² = (0.0035)^2 #<-- pixel width 0.2ᵒ ≈ 12.0 armin ≈ 0.0035 radians
 
 lcdm_sim_truth = full_chain[rand(1:nchain),:]
+h5write("lectures/julia_lecture5_LCDM_MCMC/lcdm_sim_truth.h5", "lcdm_sim_truth", lcdm_sim_truth)
+
 clTT = pico(lcdm_sim_truth)
 ell  = 0:length(clTT)-1
 cldd = clTT + σ² * exp(b² .* ell .* (ell + 1) ./ (8log(2)))
@@ -107,10 +125,15 @@ for l in ell
   end
   bandpowers[l+1] ./= (2l + 1)
 end
+h5write("homework/homework2/bandpowers.h5", "bandpowers", bandpowers)
 
-plot(ell[1:1500], (ell.*(ell+1).*bandpowers./(2π))[1:1500], label="bandpowers")
-plot(ell[1:1500], (ell.*(ell+1).*clTT./(2π))[1:1500], label="temp spectrum")
-plot(ell[1:1500], (ell.*(ell+1).*cldd./(2π))[1:1500], label="noise spectrum")
+
+semilogy(ell[1:2000], bandpowers[1:2000], label="bandpowers")
+semilogy(ell[1:2000], clTT[1:2000], label="temp spectrum")
+semilogy(ell[1:2000], cldd[1:2000], label="data spectrum")
+semilogy(ell[1:2000], (cldd-clTT)[1:2000], label="noise spectrum")
+legend()
+
 
 
 #= ###########################
@@ -134,8 +157,10 @@ upper_bounds!(opt, [0.034, 0.2,  0.55,  .0108, exp(4.0)/10,  1.25])
 lower_bounds!(opt, [0.018, 0.06, 0.01,  .0102, exp(2.75)/10, 0.85])  # <-- pico training bounds
 maxtime!(opt, 5*60.0)   # <--- max time in seconds
 max_objective!(opt, llmin)
-optf, optx, ret = optimize(opt, vec(mean(full_chain,1)))
+optf, optx, ret = optimize(opt, wmap_best_fit)
 
+# compare the fits
+hcat(optx, lcdm_sim_truth, wmap_best_fit)
 
 #= =========================
 note: here are bounding box constraints for pico
