@@ -105,7 +105,7 @@ Generate some fake data
 using PyPlot, HDF5
 
 #beam and spectral density are set to approximately match WMAP
-σ² = (10.0/3437.75)^2    #<--- noise level for a unit radian pixel (1 radian = 3437.75 arcmin)
+σ² = (10.0/3437.75)^2    #<---10μkarcmin noise level converted to per radian pixel (1 radian = 3437.75 arcmin)
 b² = (0.0035)^2 #<-- pixel width 0.2ᵒ ≈ 12.0 armin ≈ 0.0035 radians
 
 lcdm_sim_truth = full_chain[rand(1:nchain),:]
@@ -163,13 +163,15 @@ optf, optx, ret = optimize(opt, wmap_best_fit)
 hcat(optx, lcdm_sim_truth, wmap_best_fit)
 
 #= =========================
-note: here are bounding box constraints for pico
-    0.018< :omega_b       < 0.034
-    0.06 < :omega_cdm    < 0.2
-		0.01 < :tau_reio     < 0.55
-    .0102 < :theta_s    < .0108
-		exp(2.75)/10 < A_s_109 < exp(4.0)/10
-		0.85 < :n_s        < 1.25
+note: Here are bounding box constraints used for training pypico.
+      They are the upper and lower bounds used in NLopt.
+
+    0.018<      omega_b     < 0.034
+    0.06 <      omega_cdm   < 0.2
+		0.01 <      tau_reio    < 0.55
+    .0102 <     theta_s     < .0108
+exp(2.75)/10 <  A_s_109     < exp(4.0)/10
+		0.85 <      n_s         < 1.25
 =######################################
 
 
