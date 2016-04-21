@@ -3,8 +3,5 @@
 *.jl.mem
 .DS_Store
 gitignore
-homework/homework1/homework1.jl
-homework/homework1/homework1.mdw
-data/pypico
-data/wmap_chain
-lectures/julia_lecture5_LCDM_MCMC/wmap_chain
+data/*
+!data
