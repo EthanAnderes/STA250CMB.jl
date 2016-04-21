@@ -6,7 +6,7 @@
 Ethan Anderes (from the Department of Statistics)
 #### Units: 4.0
 #### Lectures: 
-2:10pm - 4pm MW in Haring Hall 1204
+2:10pm - 4pm MW in Math Sciences Building 1139
 #### Grading:
 Coding projects (written in Julia) and a final project/presentation.
 
